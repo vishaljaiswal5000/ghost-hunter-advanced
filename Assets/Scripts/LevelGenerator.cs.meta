@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8fe76d915b902e940a6246a4d6062ed5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - wall_1: {fileID: 5629142708026662733, guid: e43ca7dff9b5d5543bf57d8f80e27763, type: 3}
+  - wall_2: {fileID: 8034865304730463827, guid: 073df087b202d3145a5e997aafec2a11, type: 3}
+  - wall_3: {fileID: 232067267406254752, guid: cfb7a954260fbd549b4e5d539e3f119f, type: 3}
+  - wall_4: {fileID: 6303434717803657614, guid: a6ffc3328b3c408499c6e15fb1e82982, type: 3}
+  - wall_7: {fileID: 5088409122891694780, guid: f11948cc8381db9439d119abfb661e55, type: 3}
+  - powerPellet: {fileID: 479156062346493646, guid: ef1f5ca86319254439b1a1f3683af3d8, type: 3}
+  - normalPellet: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
