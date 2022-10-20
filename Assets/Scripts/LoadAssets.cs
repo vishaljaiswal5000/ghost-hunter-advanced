@@ -25,8 +25,7 @@ public class LoadAssets : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetupGhost();        
-        SetupIndicators();        
+        SetupGhost();                
     }
 
     // Update is called once per frame
