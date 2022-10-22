@@ -22,11 +22,12 @@ public class LoadAssets : MonoBehaviour
     const float xPositionDelta = 0.550f;
     const int totalLife = 3;
 
+    public static bool isIntroCompleted = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        SetupGhost();        
-        SetupIndicators();        
+        SetupGhost();                
     }
 
     // Update is called once per frame
@@ -39,9 +40,11 @@ public class LoadAssets : MonoBehaviour
 
             // Instantiating car 
             carInstance = Instantiate(car, car.transform.position, car.transform.rotation);
-
+            
             // Playing car background music
             backgroundNormal.Play();
+
+            isIntroCompleted = true;
         }
 
     }
