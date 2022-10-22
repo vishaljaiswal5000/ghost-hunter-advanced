@@ -31,8 +31,8 @@ public class Movement : MonoBehaviour
 
 
     void Start()
-    {        
-        init();
+    {       
+      
     }
 
 
@@ -97,27 +97,5 @@ public class Movement : MonoBehaviour
         }
         yield return null;
     }
-
-    // initializing position variables 
-    public void init()
-    {
-        startPos1 = new Vector3(-3.754f, 2.97f, 0.0f);
-        endPos1 = new Vector3(-3.754f, 4.224f, 0.0f);
-
-        startPos2 = endPos1;
-        endPos2 = new Vector3(-2.256f, 4.224f, 0.0f);
-
-        startPos3 = endPos2;
-        endPos3 = new Vector3(-2.256f, 2.97f, 0.0f);
-
-        startPos4 = endPos3;
-        endPos4 = startPos1;
-
-        transform.position = startPos1;
-        transform.rotation = Quaternion.identity;
-
-        startTime = 1.5f;
-        start = startPos1;
-        end = endPos1;
-    }
+   
 }

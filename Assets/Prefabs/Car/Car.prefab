@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 355248045046806578}
   - component: {fileID: 355248045046806577}
   - component: {fileID: 355248045046806576}
-  - component: {fileID: 355248045046806590}
+  - component: {fileID: 4829223009325908618}
   m_Layer: 0
   m_Name: Car
-  m_TagString: Untagged
+  m_TagString: Car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -32,7 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 270}
 --- !u!212 &355248045046806577
 SpriteRenderer:
@@ -106,7 +106,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &355248045046806590
+--- !u!114 &4829223009325908618
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,6 +115,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 355248045046806588}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab39bffc7efed4408bdafc96bad39ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 2706c6092eaa216459bab6ce15f62690, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 1.5
+  lastInput: 
