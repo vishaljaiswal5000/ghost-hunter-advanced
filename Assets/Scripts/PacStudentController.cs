@@ -57,7 +57,7 @@ public class PacStudentController : MonoBehaviour
                         }
                         else
                         {
-                            Transform lastTarget=activeTweens[i].Target;
+                            Transform lastTarget = activeTweens[i].Target;
                             activeTweens.Remove(activeTweens[i]);
                             AddTween(lastTarget, currentInput);
                         }
@@ -126,24 +126,28 @@ public class PacStudentController : MonoBehaviour
     public CarModel moveLeft(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x - Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
+        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 90.0f));        
         return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
     }
 
     public CarModel moveRight(Transform targetObject)
     {
-        Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
+        Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);        
+        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 270.0f));
         return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
     }
 
     public CarModel moveUp(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y - Constants.yPos_Delta, targetObject.position.z);
+        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
         return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
     }
 
     public CarModel moveDown(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y + Constants.yPos_Delta, targetObject.position.z);
+        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 180.0f));
         return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
     }
 
