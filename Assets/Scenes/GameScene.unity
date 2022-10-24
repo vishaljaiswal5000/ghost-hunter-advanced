@@ -16965,7 +16965,6 @@ MonoBehaviour:
   carLifeIndicator: {fileID: 763600742601132314, guid: 6e6821892bc4896418d4773b5ce97e1c, type: 3}
   bonusPelletIndicator: {fileID: 3014287118484848293, guid: a1665719b52f080489fb34dcdbaf4fe9, type: 3}
   backgroundIntro: {fileID: 853076409}
-  backgroundNormal: {fileID: 1154924046}
 --- !u!4 &562760868
 Transform:
   m_ObjectHideFlags: 0
@@ -17030,6 +17029,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   car: {fileID: 0}
+  pacStudentController: {fileID: 0}
 --- !u!1 &563005424
 GameObject:
   m_ObjectHideFlags: 0
