@@ -16,9 +16,9 @@ public class PacStudentController : MonoBehaviour
 
 
     private List<CarModel> activeTweens = new List<CarModel>();
+    public GameObject BonusPellet;
 
-
-    public int[] currPosition = new int[2]; //Constants.levelMapStartPos;
+    public int[] currPosition = Constants.levelMapStartPos;
     public void initMovement(CarModel carModel)
     {
         this.carModel = carModel;
@@ -27,9 +27,6 @@ public class PacStudentController : MonoBehaviour
 
     void Start()
     {
-        currPosition[0] = 1;
-        currPosition[1] = 1;
-
         mAudioSource = gameObject.GetComponent<AudioSource>();
         mAudioSource.Stop();
         mAnimator = gameObject.GetComponent<Animator>();
@@ -39,6 +36,7 @@ public class PacStudentController : MonoBehaviour
         pelletEaten= GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
         powerPelletEaten = GameObject.FindGameObjectWithTag("Sound-Power-Pellet-Eaten").GetComponent<AudioSource>();
 
+        InvokeRepeating("spawnBonusPellet", 10, 20);
     }
 
 
@@ -267,5 +265,10 @@ public class PacStudentController : MonoBehaviour
 
         }
 
+    }
+
+    public void spawnBonusPellet()
+    {
+        Instantiate(BonusPellet,Vector3.zero, BonusPellet.transform.rotation);     
     }
 }

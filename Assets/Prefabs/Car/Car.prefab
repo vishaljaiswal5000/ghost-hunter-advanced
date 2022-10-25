@@ -33,7 +33,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 270}
 --- !u!212 &355248045046806577
 SpriteRenderer:
@@ -121,7 +121,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lastInput: 0
   currentInput: 0
-  currPosition: 0200000001000000
+  carCollide: {fileID: 0}
+  pelletEaten: {fileID: 0}
+  powerPelletEaten: {fileID: 0}
+  BonusPellet: {fileID: 3014287118484848293, guid: a1665719b52f080489fb34dcdbaf4fe9, type: 3}
+  currPosition: 0100000001000000
 --- !u!82 &4540583958434406058
 AudioSource:
   m_ObjectHideFlags: 0
