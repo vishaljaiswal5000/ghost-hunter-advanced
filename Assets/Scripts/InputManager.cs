@@ -20,33 +20,38 @@ public class InputManager : MonoBehaviour
             this.pacStudentController = car.GetComponent<PacStudentController>();
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (car != null)
         {
 
-            //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x, car.transform.position.y - Constants.yPos_Delta, car.transform.position.z), 1f, KeyCode.W);
-            pacStudentController.AddTween(car.transform, KeyCode.W);
-            pacStudentController.lastInput = KeyCode.W;
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+
+                //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x, car.transform.position.y - Constants.yPos_Delta, car.transform.position.z), 1f, KeyCode.W);
+                pacStudentController.AddTween(car.transform, KeyCode.W);
+                pacStudentController.lastInput = KeyCode.W;
+            }
+
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x, car.transform.position.y + Constants.yPos_Delta, car.transform.position.z), 1f, KeyCode.S);
+                pacStudentController.AddTween(car.transform, KeyCode.S);
+                pacStudentController.lastInput = KeyCode.S;
+            }
+
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x - Constants.xPos_Delta, car.transform.position.y, car.transform.position.z), 1f, KeyCode.A);
+                pacStudentController.AddTween(car.transform, KeyCode.A);
+                pacStudentController.lastInput = KeyCode.A;
+            }
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x + Constants.xPos_Delta, car.transform.position.y, car.transform.position.z), 1f, KeyCode.D);
+                pacStudentController.AddTween(car.transform, KeyCode.D);
+                pacStudentController.lastInput = KeyCode.D;
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x, car.transform.position.y + Constants.yPos_Delta, car.transform.position.z), 1f, KeyCode.S);
-            pacStudentController.AddTween(car.transform, KeyCode.S);
-            pacStudentController.lastInput = KeyCode.S;
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x - Constants.xPos_Delta, car.transform.position.y, car.transform.position.z), 1f, KeyCode.A);
-            pacStudentController.AddTween(car.transform, KeyCode.A);
-            pacStudentController.lastInput = KeyCode.A;
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            //pacStudentController.AddTween(car.transform, car.transform.position, new Vector3(car.transform.position.x + Constants.xPos_Delta, car.transform.position.y, car.transform.position.z), 1f, KeyCode.D);
-            pacStudentController.AddTween(car.transform, KeyCode.D);
-            pacStudentController.lastInput = KeyCode.D;
-        }
     }
 }
