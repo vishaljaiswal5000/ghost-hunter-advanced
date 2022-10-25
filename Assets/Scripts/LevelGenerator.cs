@@ -52,10 +52,7 @@ public class LevelGenerator : MonoBehaviour
 
     // for wall rotations 
     bool wall1_rotationCounter, wall3_rotationCounter = true;
-
-
-  
-  
+     
 
     void Start()
     {

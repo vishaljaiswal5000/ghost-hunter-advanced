@@ -12,7 +12,7 @@ public class PacStudentController : MonoBehaviour
     private List<CarModel> activeTweens = new List<CarModel>();
 
 
-    public int[] currPosition = Constants.levelMapStartPos;
+    public int[] currPosition = new int[2]; //Constants.levelMapStartPos;
     public void initMovement(CarModel carModel)
     {
         this.carModel = carModel;
@@ -21,6 +21,9 @@ public class PacStudentController : MonoBehaviour
 
     void Start()
     {
+        currPosition[0] = 1;
+        currPosition[1] = 1;
+
         mAudioSource = gameObject.GetComponent<AudioSource>();
         mAudioSource.Stop();
         mAnimator = gameObject.GetComponent<Animator>();
@@ -29,12 +32,11 @@ public class PacStudentController : MonoBehaviour
 
 
     void Update()
-    {
+    {        
         for (int i = 0; i < activeTweens.Count; i++)
-        {
+        {            
             if (activeTweens[i] != null)
-            {
-                currentInput = lastInput;
+            {                
                 if (!mAnimator.GetBool("isDead"))
                 {
                     mAnimator.enabled = true;
@@ -50,22 +52,28 @@ public class PacStudentController : MonoBehaviour
 
                     // Updating position
                     if (timeFraction > 1)
-                    {
-                        if (lastInput != currentInput)
+                    {                        
+                        if (lastInput != activeTweens[i].input)
                         {
+                            updateLastPosition(activeTweens[i].input);
                             activeTweens.Remove(activeTweens[i]);
+                            mAudioSource.Stop();
+                            mAnimator.enabled = false;
                         }
                         else
                         {
-                            Transform lastTarget = activeTweens[i].Target;
+                            Transform lastTarget = activeTweens[i].Target;                         
+                            currentInput = activeTweens[i].input;
                             activeTweens.Remove(activeTweens[i]);
+
+                            updateLastPosition(currentInput);
                             AddTween(lastTarget, currentInput);
                         }
+                        
                     }
                     else
-                    {
+                    {                        
                         activeTweens[i].Target.position = Vector3.Lerp(activeTweens[i].StartPos, activeTweens[i].EndPos, timeFraction);
-
                     }
                 }
                 else
@@ -85,9 +93,12 @@ public class PacStudentController : MonoBehaviour
     {
         if (!TweenExists(targetObject))
         {
-            activeTweens.Add(resolveInput(targetObject, input));
-            currentInput = input;
-            return true;
+            if (validateInput(input))
+            {
+                activeTweens.Add(resolveInput(targetObject, input));
+                lastInput = input;
+                return true;
+            }
         }
 
         return false;
@@ -126,31 +137,30 @@ public class PacStudentController : MonoBehaviour
     public CarModel moveLeft(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x - Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
-        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 90.0f));        
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
+        targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 90.0f));
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.A);
     }
 
     public CarModel moveRight(Transform targetObject)
     {
-        Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);        
+        Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 270.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.D);
     }
 
     public CarModel moveUp(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y - Constants.yPos_Delta, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.W);
     }
 
     public CarModel moveDown(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y + Constants.yPos_Delta, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 180.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.S);
     }
-
 
     public bool TweenExists(Transform target)
     {
@@ -165,5 +175,63 @@ public class PacStudentController : MonoBehaviour
         {
             return false;
         }
+    }
+
+    public bool validateInput(KeyCode input)
+    {
+
+        int row = 1;
+        int col = 1;
+        if (input == KeyCode.D)
+        {
+            row = currPosition[0];
+            col = currPosition[1] + 1;
+
+        }
+        else if (input == KeyCode.A)
+        {
+            row = currPosition[0];
+            col = currPosition[1] - 1;
+        }
+        else if (input == KeyCode.W)
+        {
+            row = currPosition[0] - 1;
+            col = currPosition[1];
+        }
+        else if (input == KeyCode.S)
+        {
+            row = currPosition[0] + 1;
+            col = currPosition[1];
+        }
+
+        int code = Constants.FulllevelMap[row, col];
+
+        return (code == 0 || code == 5 || code == 6);
+
+    }
+
+    public void updateLastPosition(KeyCode input)
+    {
+        if (input == KeyCode.D)
+        {
+            currPosition[1] = currPosition[1] + 1;
+
+        }
+        else if (input == KeyCode.A)
+        {
+
+            currPosition[1] = currPosition[1] - 1;
+        }
+        else if (input == KeyCode.W)
+        {
+            currPosition[0] = currPosition[0] - 1;
+
+        }
+        else if (input == KeyCode.S)
+        {
+            currPosition[0] = currPosition[0] + 1;
+
+        }
+
     }
 }
