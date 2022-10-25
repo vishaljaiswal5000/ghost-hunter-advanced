@@ -9,6 +9,12 @@ public class PacStudentController : MonoBehaviour
     public KeyCode currentInput;
     private Animator mAnimator;
     private AudioSource mAudioSource;
+
+    public AudioSource carCollide;
+    public AudioSource pelletEaten;
+    public AudioSource powerPelletEaten;
+
+
     private List<CarModel> activeTweens = new List<CarModel>();
 
 
@@ -28,6 +34,11 @@ public class PacStudentController : MonoBehaviour
         mAudioSource.Stop();
         mAnimator = gameObject.GetComponent<Animator>();
         mAnimator.enabled = false;
+
+        carCollide = GameObject.FindGameObjectWithTag("Sound-Collide").GetComponent<AudioSource>();
+        pelletEaten= GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
+        powerPelletEaten = GameObject.FindGameObjectWithTag("Sound-Power-Pellet-Eaten").GetComponent<AudioSource>();
+
     }
 
 
@@ -98,6 +109,11 @@ public class PacStudentController : MonoBehaviour
                 activeTweens.Add(resolveInput(targetObject, input));
                 lastInput = input;
                 return true;
+            }
+            else
+            {
+                mAudioSource.Stop();
+                mAnimator.enabled = false;
             }
         }
 
@@ -205,8 +221,26 @@ public class PacStudentController : MonoBehaviour
         }
 
         int code = Constants.FulllevelMap[row, col];
-
-        return (code == 0 || code == 5 || code == 6);
+        if(code == 1 || code == 2 || code == 7 || code == 3 || code == 4)
+        {            
+            carCollide.Play();
+            return false;
+        }
+        else if(code == 5)
+        {
+            pelletEaten.Play();
+            return true;
+        }
+        else if(code == 6)
+        {
+            powerPelletEaten.Play();
+            return true;
+        }
+        else if(code == 0)
+        {
+            return true;
+        }        
+        return false;
 
     }
 
