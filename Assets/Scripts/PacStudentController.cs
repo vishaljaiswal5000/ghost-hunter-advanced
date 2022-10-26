@@ -57,31 +57,7 @@ public class PacStudentController : MonoBehaviour
                     {
                         mAudioSource.Play();
                     }
-
-                    float distance = Vector3.Distance(activeTweens[i].StartPos, activeTweens[i].EndPos);
-                    float timeFraction = (Time.time - activeTweens[i].StartTime) / activeTweens[i].Duration;
-
-                    if (timeFraction > 1)
-                    {
-                        if (lastInput != activeTweens[i].input)
-                        {
-                            activeTweens.Remove(activeTweens[i]);
-                            mAudioSource.Stop();
-                            mAnimator.enabled = false;
-                        }
-                        else
-                        {
-                            Transform lastTarget = activeTweens[i].Target;
-                            currentInput = activeTweens[i].input;
-                            activeTweens.Remove(activeTweens[i]);
-                            AddTween(lastTarget, currentInput);
-                        }
-
-                    }
-                    else
-                    {
-                        activeTweens[i].Target.position = Vector3.Lerp(activeTweens[i].StartPos, activeTweens[i].EndPos, timeFraction);
-                    }
+                    startLerp(activeTweens[i]);
                 }
                 else
                 {
@@ -89,6 +65,34 @@ public class PacStudentController : MonoBehaviour
                     mAnimator.enabled = false;
                 }
             }
+        }
+    }
+
+    public void startLerp(CarModel target)
+    {
+
+        float distance = Vector3.Distance(target.StartPos, target.EndPos);
+        float timeFraction = (Time.time - target.StartTime) / target.Duration;
+
+        if (timeFraction > 1)
+        {
+            if (lastInput != target.input)
+            {
+                activeTweens.Remove(target);
+                mAudioSource.Stop();
+                mAnimator.enabled = false;
+            }
+            else
+            {
+                Transform lastTarget = target.Target;
+                currentInput = target.input;
+                activeTweens.Remove(target);
+                AddTween(lastTarget, currentInput);
+            }
+        }
+        else
+        {
+            target.Target.position = Vector3.Lerp(target.StartPos, target.EndPos, timeFraction);
         }
     }
 
@@ -115,7 +119,6 @@ public class PacStudentController : MonoBehaviour
 
         return false;
     }
-
 
     public CarModel resolveInput(Transform targetObject, KeyCode input)
     {
@@ -277,8 +280,8 @@ public class PacStudentController : MonoBehaviour
 
     public void updateLastPosition(int row, int col)
     {
-        currPosition[0] = row;
-        currPosition[1] = col;
+        Constants.levelMaplastPos[0] = currPosition[0] = row;
+        Constants.levelMaplastPos[1] = currPosition[1] = col;        
     }
 
     public void spawnBonusPellet()

@@ -33,7 +33,7 @@ public class LoadAssets : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (backgroundIntro.time > 5.0f)
+        if (backgroundIntro.time > 4.0f)
         {
             // it will stop music and time property set 0.
             backgroundIntro.Stop();

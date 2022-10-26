@@ -9,8 +9,10 @@ public class UIManager : MonoBehaviour
 {
     Text gameTimerField;
     Text ghostScaredTimerField;
+    Text countdownField;
+    Text scoreField;
     private float gameTimer = 0.0f;
-    //private float ghostScaredTimer = 5;
+    private float ghostScaredTimer = 10;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,6 +24,7 @@ public class UIManager : MonoBehaviour
     {
         updateGameTime();
         showGhostScaredTimer();
+        updateScore();
     }
 
     public void onLevelOneClick()
@@ -74,7 +77,37 @@ public class UIManager : MonoBehaviour
                 ghostScaredTimerField = ghostScaredtimer.GetComponent<Text>();
             }
 
+            GameObject score = GameObject.FindGameObjectWithTag("Text-Score");
+            if (score != null)
+            {
+                scoreField = score.GetComponent<Text>();
+            }
 
+            GameObject countDown = GameObject.FindGameObjectWithTag("Text-CountDown");
+            if (countDown != null)
+            {
+                countdownField = countDown.GetComponent<Text>();
+            }
+
+            StartCoroutine("startCountdown");
+        }
+    }
+
+    IEnumerator startCountdown()
+    {
+        if (countdownField != null)
+        {
+            countdownField.text = "3";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "2";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "1";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "Go!";
+            // start the game here
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "";
+            yield return null;
         }
     }
 
@@ -88,7 +121,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void showGhostScaredTimer()
+    public void showGhostScaredTimer()
     {
         if (ghostScaredTimerField != null)
         {
@@ -103,5 +136,13 @@ public class UIManager : MonoBehaviour
 
         }
 
+    }
+
+    public void updateScore()
+    {
+        if (scoreField != null)
+        {
+            scoreField.text = string.Format("Score: {0}",Constants.currentScore.ToString());
+        }
     }
 }
