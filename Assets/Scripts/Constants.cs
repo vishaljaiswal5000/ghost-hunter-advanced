@@ -65,23 +65,22 @@ public class Constants
 
     public static int[] levelMapStartPos = { 1, 1 };
 
-    //public static Vector3 bonusPelletMinPosition = new Vector3(-4.899062f,4.873574f,0.0f);
-    //public static Vector3 bonusPelletMaxPosition = new Vector3(4.718785f, -4.844084f, 0.0f);
+    public float minXPos = -4.899062f;
+    public float minYPos = 4.873574f;
 
-    //public float minXPos = -4.899062f;
-    //public float minYPos = 4.873574f;
+    public float maxXPos = 4.718785f;
+    public float maxYPos = -4.844084f;
 
-    //public float maxXPos = 4.718785f;
-    //public float maxYPos = -4.844084f;
+    //public static float minXPos = -5f;
+    //public static float minYPos = 4f;
 
-    public static float minXPos = -5f;
-    public static float minYPos = 4f;
+    //public static float maxXPos = 4f;
+    //public static float maxYPos = -5f;
 
-    public static float maxXPos = 4f;
-    public static float maxYPos = -5f;
+    public static float carMovementDuration = 0.5f;
 }
 
 // todo
 //1. particle effect
-//2. cherry movement
 //3. hide ghost scared time
+//4. car smooth movement

@@ -14,7 +14,6 @@ public class PacStudentController : MonoBehaviour
     public AudioSource pelletEaten;
     public AudioSource powerPelletEaten;
 
-
     private List<CarModel> activeTweens = new List<CarModel>();
     public GameObject BonusPellet;
 
@@ -33,7 +32,7 @@ public class PacStudentController : MonoBehaviour
         mAnimator.enabled = false;
 
         carCollide = GameObject.FindGameObjectWithTag("Sound-Collide").GetComponent<AudioSource>();
-        pelletEaten= GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
+        pelletEaten = GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
         powerPelletEaten = GameObject.FindGameObjectWithTag("Sound-Power-Pellet-Eaten").GetComponent<AudioSource>();
 
         InvokeRepeating("spawnBonusPellet", 10, 20);
@@ -41,11 +40,16 @@ public class PacStudentController : MonoBehaviour
 
 
     void Update()
-    {        
+    {
+        carMovement();
+    }
+
+    public void carMovement()
+    {
         for (int i = 0; i < activeTweens.Count; i++)
-        {            
+        {
             if (activeTweens[i] != null)
-            {                
+            {
                 if (!mAnimator.GetBool("isDead"))
                 {
                     mAnimator.enabled = true;
@@ -54,14 +58,11 @@ public class PacStudentController : MonoBehaviour
                         mAudioSource.Play();
                     }
 
-                    //between vector A and B
                     float distance = Vector3.Distance(activeTweens[i].StartPos, activeTweens[i].EndPos);
-
                     float timeFraction = (Time.time - activeTweens[i].StartTime) / activeTweens[i].Duration;
 
-                    // Updating position
                     if (timeFraction > 1)
-                    {                        
+                    {
                         if (lastInput != activeTweens[i].input)
                         {
                             updateLastPosition(activeTweens[i].input);
@@ -71,17 +72,17 @@ public class PacStudentController : MonoBehaviour
                         }
                         else
                         {
-                            Transform lastTarget = activeTweens[i].Target;                         
+                            Transform lastTarget = activeTweens[i].Target;
                             currentInput = activeTweens[i].input;
                             activeTweens.Remove(activeTweens[i]);
 
                             updateLastPosition(currentInput);
                             AddTween(lastTarget, currentInput);
                         }
-                        
+
                     }
                     else
-                    {                        
+                    {
                         activeTweens[i].Target.position = Vector3.Lerp(activeTweens[i].StartPos, activeTweens[i].EndPos, timeFraction);
                     }
                 }
@@ -152,28 +153,28 @@ public class PacStudentController : MonoBehaviour
     {
         Vector3 endPos = new Vector3(targetObject.position.x - Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 90.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.A);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.A);
     }
 
     public CarModel moveRight(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 270.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.D);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.D);
     }
 
     public CarModel moveUp(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y - Constants.yPos_Delta, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.W);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.W);
     }
 
     public CarModel moveDown(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y + Constants.yPos_Delta, targetObject.position.z);
         targetObject.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 180.0f));
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, 1f, KeyCode.S);
+        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.S);
     }
 
     public bool TweenExists(Transform target)
@@ -219,27 +220,31 @@ public class PacStudentController : MonoBehaviour
         }
 
         int code = Constants.FulllevelMap[row, col];
-        if(code == 1 || code == 2 || code == 7 || code == 3 || code == 4)
-        {            
-            carCollide.Play();
-            return false;
-        }
-        else if(code == 5)
-        {
-            pelletEaten.Play();
-            return true;
-        }
-        else if(code == 6)
-        {
-            powerPelletEaten.Play();
-            return true;
-        }
-        else if(code == 0)
-        {
-            return true;
-        }        
-        return false;
+        return checkValidation(code);
+    }
 
+    public bool checkValidation(int code)
+    {
+        switch (code)
+        {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 7:
+                carCollide.Play();
+                return false;
+            case 5:
+                pelletEaten.Play();
+                return true;
+            case 6:
+                powerPelletEaten.Play();
+                return true;
+            case 0:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public void updateLastPosition(KeyCode input)
@@ -269,6 +274,6 @@ public class PacStudentController : MonoBehaviour
 
     public void spawnBonusPellet()
     {
-        Instantiate(BonusPellet,Vector3.zero, BonusPellet.transform.rotation);     
+        Instantiate(BonusPellet, Vector3.zero, BonusPellet.transform.rotation);
     }
 }
