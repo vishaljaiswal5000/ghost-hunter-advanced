@@ -14,13 +14,15 @@ public class CarModel
 
     public float Duration { get; private set; }
 
-    public CarModel(Transform targetObject, Vector3 startPos, Vector3 endPos, float startTime, float duration)
+    public KeyCode input { get; private set; }
+    public CarModel(Transform targetObject, Vector3 startPos, Vector3 endPos, float startTime, float duration, KeyCode input)
     {
         this.Target = targetObject;
         this.StartPos = startPos;
         this.EndPos = endPos;
         this.StartTime = startTime;
         this.Duration = duration;
+        this.input = input;
     }
 
 }
