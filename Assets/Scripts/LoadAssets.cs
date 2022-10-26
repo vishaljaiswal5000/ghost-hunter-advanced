@@ -16,7 +16,7 @@ public class LoadAssets : MonoBehaviour
     private GameObject carInstance;
 
     public AudioSource backgroundIntro;
-    public AudioSource backgroundNormal;
+    //public AudioSource backgroundNormal;
 
     // Constants
     const float xPositionDelta = 0.550f;
@@ -42,7 +42,7 @@ public class LoadAssets : MonoBehaviour
             carInstance = Instantiate(car, car.transform.position, car.transform.rotation);
             
             // Playing car background music
-            backgroundNormal.Play();
+            //backgroundNormal.Play();
 
             isIntroCompleted = true;
         }
