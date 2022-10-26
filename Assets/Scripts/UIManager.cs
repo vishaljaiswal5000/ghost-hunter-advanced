@@ -92,7 +92,7 @@ public class UIManager : MonoBehaviour
     {
         if (ghostScaredTimerField != null)
         {
-            if (true)
+            if (false)
             {
                 ghostScaredTimerField.enabled = true;
             }

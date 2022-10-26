@@ -65,7 +65,6 @@ public class PacStudentController : MonoBehaviour
                     {
                         if (lastInput != activeTweens[i].input)
                         {
-                            //updateLastPosition(activeTweens[i].input);
                             activeTweens.Remove(activeTweens[i]);
                             mAudioSource.Stop();
                             mAnimator.enabled = false;
@@ -75,8 +74,6 @@ public class PacStudentController : MonoBehaviour
                             Transform lastTarget = activeTweens[i].Target;
                             currentInput = activeTweens[i].input;
                             activeTweens.Remove(activeTweens[i]);
-
-                            //updateLastPosition(currentInput);
                             AddTween(lastTarget, currentInput);
                         }
 
@@ -219,11 +216,30 @@ public class PacStudentController : MonoBehaviour
             col = currPosition[1];
         }
 
-        if (col == -1)
+        if (row == 14 || row == 15)
         {
-            col = 28;
+            if (col == 0)
+            {
+                col = 27;
+                teleport(true);
+            }
+            else if (col == 27)
+            {
+                col = 0;
+                teleport(false);
+            }
         }
-        int code = Constants.FulllevelMap[row, col];
+
+        int code;
+        try
+        {
+            code = Constants.FulllevelMap[row, col];
+        }
+        catch (System.Exception)
+        {
+            code = -1;
+        }
+
         bool status = checkValidation(code);
         if (status)
         {
@@ -252,6 +268,8 @@ public class PacStudentController : MonoBehaviour
                 return true;
             case 0:
                 return true;
+            case -1:
+                return true;
             default:
                 return false;
         }
@@ -261,33 +279,25 @@ public class PacStudentController : MonoBehaviour
     {
         currPosition[0] = row;
         currPosition[1] = col;
-        //if (input == KeyCode.D)
-        //{
-        //    currPosition[1] = currPosition[1] + 1;
-
-        //}
-        //else if (input == KeyCode.A)
-        //{
-
-        //    currPosition[1] = currPosition[1] - 1;
-        //}
-        //else if (input == KeyCode.W)
-        //{
-        //    currPosition[0] = currPosition[0] - 1;
-
-        //}
-        //else if (input == KeyCode.S)
-        //{
-        //    currPosition[0] = currPosition[0] + 1;
-
-        //}
-
-
-
     }
 
     public void spawnBonusPellet()
     {
         Instantiate(BonusPellet, Vector3.zero, BonusPellet.transform.rotation);
+    }
+
+    public void teleport(bool isEnteredFromLeft)
+    {
+        float xPos;
+        if (isEnteredFromLeft)
+        {
+            xPos = 3.853715f + Constants.xPos_Delta;
+        }
+        else
+        {
+            xPos = -3.721889f - Constants.xPos_Delta;
+        }
+
+        gameObject.transform.position = new Vector3(xPos, gameObject.transform.position.y, gameObject.transform.position.z);
     }
 }
