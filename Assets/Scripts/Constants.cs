@@ -65,11 +65,10 @@ public class Constants
 
     public static int[] levelMapStartPos = { 1, 1 };
 
-    public float minXPos = -4.899062f;
-    public float minYPos = 4.873574f;
-
-    public float maxXPos = 4.718785f;
-    public float maxYPos = -4.844084f;
+    public static float minXPos = -4.899062f;
+    public static float minYPos = 4.873574f;
+    public static float maxXPos = 4.718785f;
+    public static float maxYPos = -4.844084f;
 
     //public static float minXPos = -5f;
     //public static float minYPos = 4f;

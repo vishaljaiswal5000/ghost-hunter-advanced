@@ -65,7 +65,7 @@ public class PacStudentController : MonoBehaviour
                     {
                         if (lastInput != activeTweens[i].input)
                         {
-                            updateLastPosition(activeTweens[i].input);
+                            //updateLastPosition(activeTweens[i].input);
                             activeTweens.Remove(activeTweens[i]);
                             mAudioSource.Stop();
                             mAnimator.enabled = false;
@@ -76,7 +76,7 @@ public class PacStudentController : MonoBehaviour
                             currentInput = activeTweens[i].input;
                             activeTweens.Remove(activeTweens[i]);
 
-                            updateLastPosition(currentInput);
+                            //updateLastPosition(currentInput);
                             AddTween(lastTarget, currentInput);
                         }
 
@@ -219,8 +219,18 @@ public class PacStudentController : MonoBehaviour
             col = currPosition[1];
         }
 
+        if (col == -1)
+        {
+            col = 28;
+        }
         int code = Constants.FulllevelMap[row, col];
-        return checkValidation(code);
+        bool status = checkValidation(code);
+        if (status)
+        {
+            updateLastPosition(row, col);
+        }
+
+        return status;
     }
 
     public bool checkValidation(int code)
@@ -247,28 +257,32 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    public void updateLastPosition(KeyCode input)
+    public void updateLastPosition(int row, int col)
     {
-        if (input == KeyCode.D)
-        {
-            currPosition[1] = currPosition[1] + 1;
+        currPosition[0] = row;
+        currPosition[1] = col;
+        //if (input == KeyCode.D)
+        //{
+        //    currPosition[1] = currPosition[1] + 1;
 
-        }
-        else if (input == KeyCode.A)
-        {
+        //}
+        //else if (input == KeyCode.A)
+        //{
 
-            currPosition[1] = currPosition[1] - 1;
-        }
-        else if (input == KeyCode.W)
-        {
-            currPosition[0] = currPosition[0] - 1;
+        //    currPosition[1] = currPosition[1] - 1;
+        //}
+        //else if (input == KeyCode.W)
+        //{
+        //    currPosition[0] = currPosition[0] - 1;
 
-        }
-        else if (input == KeyCode.S)
-        {
-            currPosition[0] = currPosition[0] + 1;
+        //}
+        //else if (input == KeyCode.S)
+        //{
+        //    currPosition[0] = currPosition[0] + 1;
 
-        }
+        //}
+
+
 
     }
 

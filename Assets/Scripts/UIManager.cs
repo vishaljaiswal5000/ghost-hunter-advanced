@@ -10,7 +10,7 @@ public class UIManager : MonoBehaviour
     Text gameTimerField;
     Text ghostScaredTimerField;
     private float gameTimer = 0.0f;
-    private float ghostScaredTimer = 5;
+    //private float ghostScaredTimer = 5;
     // Start is called before the first frame update
     void Start()
     {
