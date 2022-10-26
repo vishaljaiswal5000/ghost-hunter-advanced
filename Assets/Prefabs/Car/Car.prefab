@@ -128,7 +128,7 @@ MonoBehaviour:
   pelletEaten: {fileID: 0}
   powerPelletEaten: {fileID: 0}
   BonusPellet: {fileID: 3014287118484848293, guid: a1665719b52f080489fb34dcdbaf4fe9, type: 3}
-  currPosition: 0100000001000000
+  currPosition: 0300000001000000
 --- !u!82 &4540583958434406058
 AudioSource:
   m_ObjectHideFlags: 0

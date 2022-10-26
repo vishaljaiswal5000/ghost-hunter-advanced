@@ -11,8 +11,7 @@ public class GhostAnimator: MonoBehaviour
 
 
     void Start()
-    {
-        // Fetching animator component
+    {        
         mAnimator = GetComponent<Animator>();
     }
 

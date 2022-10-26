@@ -73,6 +73,9 @@ public class Constants
 
     public static float carMovementDuration = 0.75f;
     public static int currentScore = 0;
+
+    public static int scaredTotalTime = 10;
+    public static bool isGhostScared = false;
 }
 
 // todo

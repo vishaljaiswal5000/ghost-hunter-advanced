@@ -20,6 +20,7 @@ public class UpdateScore : MonoBehaviour
         {
             // Scare ghost state
             // Start 10 time
+            Constants.isGhostScared = true;
             // remove pellet from map
             Constants.FulllevelMap[Constants.levelMaplastPos[0], Constants.levelMaplastPos[1]] = 0;
             //remove pellet

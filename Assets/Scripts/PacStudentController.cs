@@ -17,7 +17,7 @@ public class PacStudentController : MonoBehaviour
     private List<CarModel> activeTweens = new List<CarModel>();
     public GameObject BonusPellet;
 
-    public int[] currPosition = Constants.levelMapStartPos;
+    public int[] currPosition;
     public void initMovement(CarModel carModel)
     {
         this.carModel = carModel;
@@ -26,6 +26,8 @@ public class PacStudentController : MonoBehaviour
 
     void Start()
     {
+        currPosition = Constants.levelMapStartPos;
+
         mAudioSource = gameObject.GetComponent<AudioSource>();
         mAudioSource.Stop();
         mAnimator = gameObject.GetComponent<Animator>();

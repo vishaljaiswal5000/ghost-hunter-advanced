@@ -12,7 +12,8 @@ public class UIManager : MonoBehaviour
     Text countdownField;
     Text scoreField;
     private float gameTimer = 0.0f;
-    private float ghostScaredTimer = 10;
+    public bool isGhostTimerStarted = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -93,6 +94,39 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    IEnumerator ghostScareCountdown()
+    {
+        if (ghostScaredTimerField != null && Constants.isGhostScared)
+        {
+            isGhostTimerStarted = true;
+            ghostScaredTimerField.text = "Scared Time: 10";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 9";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 8";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 7";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 6";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 5";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 4";
+            yield return new WaitForSeconds(1.0f);
+            //Recovery state
+            ghostScaredTimerField.text = "Scared Time: 3";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 2";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 1";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "";
+            yield return null;
+            isGhostTimerStarted = false;
+            Constants.isGhostScared = false;
+        }
+    }
+
     IEnumerator startCountdown()
     {
         if (countdownField != null)
@@ -123,17 +157,10 @@ public class UIManager : MonoBehaviour
 
     public void showGhostScaredTimer()
     {
-        if (ghostScaredTimerField != null)
+        if (ghostScaredTimerField != null && !isGhostTimerStarted)
         {
-            if (false)
-            {
-                ghostScaredTimerField.enabled = true;
-            }
-            else
-            {
-                ghostScaredTimerField.enabled = false;
-            }
-
+            StartCoroutine("ghostScareCountdown");
+           
         }
 
     }
@@ -142,7 +169,8 @@ public class UIManager : MonoBehaviour
     {
         if (scoreField != null)
         {
-            scoreField.text = string.Format("Score: {0}",Constants.currentScore.ToString());
+            scoreField.text = string.Format("Score: {0}", Constants.currentScore.ToString());
         }
     }
+         
 }
