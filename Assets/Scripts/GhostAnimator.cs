@@ -20,20 +20,18 @@ public class GhostAnimator: MonoBehaviour
     {
         if (mAnimator != null)
         {
-            if (mAnimator.GetBool("isScared") && !isScaredPlayed)
+            if (mAnimator.GetBool("isScared") && Constants.isGhostRecovering)
             {
-                // play audio
-                isScaredPlayed = true;
+                mAnimator.SetBool("isRecovering", true);
             }
-            else if (mAnimator.GetBool("isScared") && mAnimator.GetBool("isDead") && !isDeadPlayed)
+            else if (Constants.isGhostScared)
             {
-                // play audio
-                isDeadPlayed = true;
+                mAnimator.SetBool("isScared",true);
             }
             else
             {
-                isScaredPlayed = false;
-                isDeadPlayed = false;
+                mAnimator.SetBool("isScared", false);
+                mAnimator.SetBool("isRecovering", false);
             }
         }
     }

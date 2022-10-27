@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     Text ghostScaredTimerField;
     Text countdownField;
     Text scoreField;
+
     private float gameTimer = 0.0f;
     public bool isGhostTimerStarted = false;
 
@@ -114,6 +115,7 @@ public class UIManager : MonoBehaviour
             ghostScaredTimerField.text = "Scared Time: 4";
             yield return new WaitForSeconds(1.0f);
             //Recovery state
+            Constants.isGhostRecovering = true;
             ghostScaredTimerField.text = "Scared Time: 3";
             yield return new WaitForSeconds(1.0f);
             ghostScaredTimerField.text = "Scared Time: 2";
@@ -124,6 +126,7 @@ public class UIManager : MonoBehaviour
             yield return null;
             isGhostTimerStarted = false;
             Constants.isGhostScared = false;
+            Constants.isGhostRecovering = false;
         }
     }
 

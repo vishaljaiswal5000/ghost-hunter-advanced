@@ -76,6 +76,7 @@ public class Constants
 
     public static int scaredTotalTime = 10;
     public static bool isGhostScared = false;
+    public static bool isGhostRecovering = false;
 }
 
 // todo

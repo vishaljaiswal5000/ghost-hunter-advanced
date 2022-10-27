@@ -2923,7 +2923,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 2ffbb7ef6312255488d3727fd640b7a9, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -17048,6 +17048,7 @@ MonoBehaviour:
   carLifeIndicator: {fileID: 763600742601132314, guid: 6e6821892bc4896418d4773b5ce97e1c, type: 3}
   bonusPelletIndicator: {fileID: 3014287118484848293, guid: a1665719b52f080489fb34dcdbaf4fe9, type: 3}
   backgroundIntro: {fileID: 853076409}
+  ghostScared: {fileID: 81796830}
 --- !u!4 &562760868
 Transform:
   m_ObjectHideFlags: 0
