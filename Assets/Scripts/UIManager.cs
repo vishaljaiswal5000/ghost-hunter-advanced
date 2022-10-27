@@ -9,8 +9,12 @@ public class UIManager : MonoBehaviour
 {
     Text gameTimerField;
     Text ghostScaredTimerField;
+    Text countdownField;
+    Text scoreField;
+
     private float gameTimer = 0.0f;
-    private float ghostScaredTimer = 5;
+    public bool isGhostTimerStarted = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -22,6 +26,7 @@ public class UIManager : MonoBehaviour
     {
         updateGameTime();
         showGhostScaredTimer();
+        updateScore();
     }
 
     public void onLevelOneClick()
@@ -74,7 +79,72 @@ public class UIManager : MonoBehaviour
                 ghostScaredTimerField = ghostScaredtimer.GetComponent<Text>();
             }
 
+            GameObject score = GameObject.FindGameObjectWithTag("Text-Score");
+            if (score != null)
+            {
+                scoreField = score.GetComponent<Text>();
+            }
 
+            GameObject countDown = GameObject.FindGameObjectWithTag("Text-CountDown");
+            if (countDown != null)
+            {
+                countdownField = countDown.GetComponent<Text>();
+            }
+
+            StartCoroutine("startCountdown");
+        }
+    }
+
+    IEnumerator ghostScareCountdown()
+    {
+        if (ghostScaredTimerField != null && Constants.isGhostScared)
+        {
+            isGhostTimerStarted = true;
+            ghostScaredTimerField.text = "Scared Time: 10";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 9";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 8";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 7";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 6";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 5";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 4";
+            yield return new WaitForSeconds(1.0f);
+            //Recovery state
+            Constants.isGhostRecovering = true;
+            ghostScaredTimerField.text = "Scared Time: 3";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 2";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "Scared Time: 1";
+            yield return new WaitForSeconds(1.0f);
+            ghostScaredTimerField.text = "";
+            yield return null;
+            isGhostTimerStarted = false;
+            Constants.isGhostScared = false;
+            Constants.isGhostRecovering = false;
+        }
+    }
+
+    IEnumerator startCountdown()
+    {
+        if (countdownField != null)
+        {
+            countdownField.text = "3";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "2";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "1";
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "Go!";
+            // start the game here
+            yield return new WaitForSeconds(1.0f);
+            countdownField.text = "";
+            yield return null;
         }
     }
 
@@ -88,20 +158,22 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void showGhostScaredTimer()
+    public void showGhostScaredTimer()
     {
-        if (ghostScaredTimerField != null)
+        if (ghostScaredTimerField != null && !isGhostTimerStarted)
         {
-            if (true)
-            {
-                ghostScaredTimerField.enabled = true;
-            }
-            else
-            {
-                ghostScaredTimerField.enabled = false;
-            }
-
+            StartCoroutine("ghostScareCountdown");
+           
         }
 
     }
+
+    public void updateScore()
+    {
+        if (scoreField != null)
+        {
+            scoreField.text = string.Format("Score: {0}", Constants.currentScore.ToString());
+        }
+    }
+         
 }

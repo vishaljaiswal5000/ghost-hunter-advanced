@@ -64,20 +64,19 @@ public class Constants
                      };
 
     public static int[] levelMapStartPos = { 1, 1 };
+    public static int[] levelMaplastPos = new int[2];
 
-    public float minXPos = -4.899062f;
-    public float minYPos = 4.873574f;
+    public static float minXPos = -4.899062f;
+    public static float minYPos = 4.873574f;
+    public static float maxXPos = 4.718785f;
+    public static float maxYPos = -4.844084f;
 
-    public float maxXPos = 4.718785f;
-    public float maxYPos = -4.844084f;
+    public static float carMovementDuration = 0.75f;
+    public static int currentScore = 0;
 
-    //public static float minXPos = -5f;
-    //public static float minYPos = 4f;
-
-    //public static float maxXPos = 4f;
-    //public static float maxYPos = -5f;
-
-    public static float carMovementDuration = 0.5f;
+    public static int scaredTotalTime = 10;
+    public static bool isGhostScared = false;
+    public static bool isGhostRecovering = false;
 }
 
 // todo
