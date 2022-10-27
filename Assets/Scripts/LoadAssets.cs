@@ -16,7 +16,8 @@ public class LoadAssets : MonoBehaviour
     private GameObject carInstance;
 
     public AudioSource backgroundIntro;
-    //public AudioSource backgroundNormal;
+    public AudioSource ghostScared;
+    
 
     // Constants
     const float xPositionDelta = 0.550f;
@@ -33,7 +34,7 @@ public class LoadAssets : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (backgroundIntro.time > 5.0f)
+        if (backgroundIntro.time > 4.0f)
         {
             // it will stop music and time property set 0.
             backgroundIntro.Stop();
@@ -47,6 +48,15 @@ public class LoadAssets : MonoBehaviour
             isIntroCompleted = true;
         }
 
+        if (Constants.isGhostScared && !ghostScared.isPlaying)
+        {
+            ghostScared.Play();
+        }
+
+        if (!Constants.isGhostScared)
+        {
+            ghostScared.Stop();
+        }
     }
 
     // Showing Life and bonus indicators in the bottom of the level
