@@ -51,7 +51,7 @@ public class Movement : MonoBehaviour
     public IEnumerator StartMovement()
     {
         // For Assigment 3 only - Checking if car is wrecked/dead by animation parameter
-        if (!mAnimator.GetBool("isDead"))
+        if (mAnimator!=null && !mAnimator.GetBool("isDead"))
         {
             //between vector A and B
             float distance = Vector3.Distance(start, end);
