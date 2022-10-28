@@ -13,11 +13,14 @@ public class PacStudentController : MonoBehaviour
     public AudioSource carCollide;
     public AudioSource pelletEaten;
     public AudioSource powerPelletEaten;
+    public AudioSource carWreck;
 
     private List<CarModel> activeTweens = new List<CarModel>();
     public GameObject BonusPellet;
 
     public int[] currPosition;
+    public Vector3 carBeginningPosition;
+    public Vector3 carBeginningRotation;
     public void initMovement(CarModel carModel)
     {
         this.carModel = carModel;
@@ -27,6 +30,7 @@ public class PacStudentController : MonoBehaviour
     void Start()
     {
         currPosition = Constants.levelMapStartPos;
+        carBeginningPosition = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z);
 
         mAudioSource = gameObject.GetComponent<AudioSource>();
         mAudioSource.Stop();
@@ -36,8 +40,12 @@ public class PacStudentController : MonoBehaviour
         carCollide = GameObject.FindGameObjectWithTag("Sound-Collide").GetComponent<AudioSource>();
         pelletEaten = GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
         powerPelletEaten = GameObject.FindGameObjectWithTag("Sound-Power-Pellet-Eaten").GetComponent<AudioSource>();
+        carWreck = GameObject.FindGameObjectWithTag("Sound-Wreck").GetComponent<AudioSource>();
 
-        InvokeRepeating("spawnBonusPellet", 10, 20);
+        if (!Constants.isGameOver)
+        {
+            InvokeRepeating("spawnBonusPellet", 10, 20);
+        }
     }
 
 
@@ -283,7 +291,7 @@ public class PacStudentController : MonoBehaviour
     public void updateLastPosition(int row, int col)
     {
         Constants.levelMaplastPos[0] = currPosition[0] = row;
-        Constants.levelMaplastPos[1] = currPosition[1] = col;        
+        Constants.levelMaplastPos[1] = currPosition[1] = col;
     }
 
     public void spawnBonusPellet()
@@ -304,5 +312,20 @@ public class PacStudentController : MonoBehaviour
         }
 
         gameObject.transform.position = new Vector3(xPos, gameObject.transform.position.y, gameObject.transform.position.z);
+    }
+
+    public void respawn()
+    {
+        activeTweens = new List<CarModel>();
+        transform.position = carBeginningPosition;
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, 270));
+        updateLastPosition(1, 1);
+        currPosition[0] = 1;
+        currPosition[1] = 1;
+    }
+
+    public void stopMovement()
+    {
+        activeTweens.Clear();
     }
 }

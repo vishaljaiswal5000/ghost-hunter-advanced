@@ -11,6 +11,8 @@ public class UIManager : MonoBehaviour
     Text ghostScaredTimerField;
     Text countdownField;
     Text scoreField;
+    Text highscoreField;
+    Text highscoreTimeField;
 
     private float gameTimer = 0.0f;
     public bool isGhostTimerStarted = false;
@@ -18,6 +20,22 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        //reset();
+        GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
+        if (highscore != null)
+        {
+            highscoreField = highscore.GetComponent<Text>();
+        }
+
+        GameObject highscoreTime = GameObject.FindGameObjectWithTag("Text-Highscore-Time");
+        if (highscoreTime != null)
+        {
+            highscoreTimeField = highscoreTime.GetComponent<Text>();
+        }
+
+        setHighscore();
+
 
     }
 
@@ -58,7 +76,25 @@ public class UIManager : MonoBehaviour
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.buildIndex == 1)
+        if (scene.buildIndex == 0)
+        {
+            //reset();
+            GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
+            if (highscore != null)
+            {
+                highscoreField = highscore.GetComponent<Text>();
+            }
+
+            GameObject highscoreTime = GameObject.FindGameObjectWithTag("Text-Highscore-Time");
+            if (highscoreTime != null)
+            {
+                highscoreTimeField = highscoreTime.GetComponent<Text>();
+            }
+
+            setHighscore();
+
+        }
+        else if (scene.buildIndex == 1)
         {
             GameObject quitButton = GameObject.FindGameObjectWithTag("QuitButton");
             if (quitButton != null)
@@ -150,9 +186,10 @@ public class UIManager : MonoBehaviour
 
     void updateGameTime()
     {
-        if (gameTimerField != null && LoadAssets.isIntroCompleted)
+        if (gameTimerField != null && LoadAssets.isIntroCompleted && !Constants.isGameOver)
         {
             gameTimer += Time.deltaTime;
+            Constants.playerGameTime = gameTimer;
             string completeTimeStr = "Time: " + TimeSpan.FromSeconds(gameTimer).ToString("mm':'ss':'ff");
             gameTimerField.text = completeTimeStr;
         }
@@ -163,7 +200,7 @@ public class UIManager : MonoBehaviour
         if (ghostScaredTimerField != null && !isGhostTimerStarted)
         {
             StartCoroutine("ghostScareCountdown");
-           
+
         }
 
     }
@@ -175,5 +212,25 @@ public class UIManager : MonoBehaviour
             scoreField.text = string.Format("Score: {0}", Constants.currentScore.ToString());
         }
     }
-         
+
+    public void reset()
+    {
+        Constants.isGameOver = false;
+        Constants.currentScore = 0;
+        Constants.playerGameTime = 0f;
+        LoadAssets.isIntroCompleted = false;
+    }
+
+    public void setHighscore()
+    {
+        if (PlayerPrefs.HasKey(Constants.highscoreKey))
+        {
+            highscoreField.text = "HighScore: " + PlayerPrefs.GetInt(Constants.highscoreKey).ToString();
+        }
+
+        if (PlayerPrefs.HasKey(Constants.timeKey))
+        {
+            highscoreTimeField.text = "Time: " + TimeSpan.FromSeconds(PlayerPrefs.GetFloat(Constants.timeKey)).ToString("mm':'ss':'ff");
+        }
+    }
 }

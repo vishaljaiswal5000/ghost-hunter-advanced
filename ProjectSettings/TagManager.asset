@@ -8,6 +8,9 @@ TagManager:
   - QuitButton
   - HUD
   - Panel-Lives
+  - Managers
+  - Text-Highscore
+  - Text-Highscore-Time
   layers:
   - Default
   - TransparentFX

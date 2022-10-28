@@ -16,7 +16,7 @@ public class InputManager : MonoBehaviour
             this.pacStudentController = car.GetComponent<PacStudentController>();
         }
 
-        if (car != null)
+        if (car != null && !Constants.isGameOver)
         {
 
             if (Input.GetKeyDown(KeyCode.W))

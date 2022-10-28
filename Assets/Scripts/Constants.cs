@@ -77,6 +77,11 @@ public class Constants
     public static int scaredTotalTime = 10;
     public static bool isGhostScared = false;
     public static bool isGhostRecovering = false;
+    public static bool isGameOver = false;
+    public static float playerGameTime = 0f;
+
+    public static string highscoreKey = "highscoreState";
+    public static string timeKey = "timeState";
 }
 
 // todo
