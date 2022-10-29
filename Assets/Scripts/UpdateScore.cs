@@ -17,7 +17,9 @@ public class UpdateScore : MonoBehaviour
         if (collision.tag == "Normal-Pellet")
         {
             //update score
-            updateScore(10);            
+            updateScore(10);
+
+            pacStudentController.checkTotalPellet();
             //remove pellet
             Destroy(collision.gameObject);
         }

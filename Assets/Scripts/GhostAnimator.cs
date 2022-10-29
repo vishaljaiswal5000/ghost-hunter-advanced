@@ -31,6 +31,8 @@ public class GhostAnimator: MonoBehaviour
                     isDead = false;
                     timer = 0f;
                     mAnimator.SetBool("isDead", false);
+                    mAnimator.SetBool("isRecovering", false);
+                    mAnimator.SetBool("isScared", false);
                 }
             }
             else if (mAnimator.GetBool("isScared") && Constants.isGhostRecovering)
@@ -44,6 +46,7 @@ public class GhostAnimator: MonoBehaviour
             else
             {
                 mAnimator.SetBool("isScared", false);
+                mAnimator.SetBool("isDead", false);
                 mAnimator.SetBool("isRecovering", false);
             }
         }

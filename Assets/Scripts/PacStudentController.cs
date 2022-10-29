@@ -212,7 +212,7 @@ public class PacStudentController : MonoBehaviour
     {
         // Linq instead of loop
         //CarModel tween = activeTweens.Find(x => x.input == lastInput);
-        CarModel tween = activeTweens.Find(x => x.Target== target);
+        CarModel tween = activeTweens.Find(x => x.Target == target);
 
         if (tween != null)
         {
@@ -295,7 +295,7 @@ public class PacStudentController : MonoBehaviour
         }
 
         // Count total pellet left
-        checkTotalPellet();
+        //checkTotalPellet();
 
         return status;
     }
@@ -373,17 +373,8 @@ public class PacStudentController : MonoBehaviour
     public void checkTotalPellet()
     {
         int totalPellet = 0;
-        for (int i = 0; i < Constants.FulllevelMap.GetLength(0); i++)
-        {
-            for (int j = 0; j < Constants.FulllevelMap.GetLength(1); j++)
-            {
-                if (Constants.FulllevelMap[i, j] == 5)
-                {
-                    totalPellet += 1;
-                }
-            }
-        }
-
+        GameObject[] pellets = GameObject.FindGameObjectsWithTag("Normal-Pellet");
+        totalPellet = pellets.Length - 1;
         Constants.pelletLeft = totalPellet;
     }
 }
