@@ -86,7 +86,3 @@ public class Constants
     public static int pelletLeft = 220;
 }
 
-// todo
-//1. particle effect
-//3. hide ghost scared time
-//4. car smooth movement
