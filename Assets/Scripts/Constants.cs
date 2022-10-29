@@ -82,6 +82,8 @@ public class Constants
 
     public static string highscoreKey = "highscoreState";
     public static string timeKey = "timeState";
+
+    public static int pelletLeft = 220;
 }
 
 // todo

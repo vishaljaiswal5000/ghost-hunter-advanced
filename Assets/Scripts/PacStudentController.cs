@@ -18,34 +18,42 @@ public class PacStudentController : MonoBehaviour
     private List<CarModel> activeTweens = new List<CarModel>();
     public GameObject BonusPellet;
 
+    public ParticleSystem particleEffect;
     public int[] currPosition;
     public Vector3 carBeginningPosition;
     public Vector3 carBeginningRotation;
-    public void initMovement(CarModel carModel)
+    public void init()
     {
-        this.carModel = carModel;
-        mAnimator = this.carModel.Target.GetComponent<Animator>();
-    }
-
-    void Start()
-    {
+        // Update starting position
         currPosition = Constants.levelMapStartPos;
         carBeginningPosition = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z);
 
+        // Load animator and car audio
         mAudioSource = gameObject.GetComponent<AudioSource>();
         mAudioSource.Stop();
         mAnimator = gameObject.GetComponent<Animator>();
         mAnimator.enabled = false;
 
+        // Load audio sources
         carCollide = GameObject.FindGameObjectWithTag("Sound-Collide").GetComponent<AudioSource>();
         pelletEaten = GameObject.FindGameObjectWithTag("Sound-Pellet-Eaten").GetComponent<AudioSource>();
         powerPelletEaten = GameObject.FindGameObjectWithTag("Sound-Power-Pellet-Eaten").GetComponent<AudioSource>();
         carWreck = GameObject.FindGameObjectWithTag("Sound-Wreck").GetComponent<AudioSource>();
 
+        // Load car(pacstudent) particle system
+        particleEffect = GameObject.FindGameObjectWithTag("Particle-Effect-Drive").GetComponent<ParticleSystem>();
+        particleEffect.Stop();
+
+        // Spawn Bonus pellet until game over
         if (!Constants.isGameOver)
         {
             InvokeRepeating("spawnBonusPellet", 10, 20);
         }
+    }
+
+    void Start()
+    {
+        init();
     }
 
 
@@ -80,7 +88,7 @@ public class PacStudentController : MonoBehaviour
 
     public void startLerp(CarModel target)
     {
-
+        // calculate distance between start and end position 
         float distance = Vector3.Distance(target.StartPos, target.EndPos);
         float timeFraction = (Time.time - target.StartTime) / target.Duration;
 
@@ -88,15 +96,28 @@ public class PacStudentController : MonoBehaviour
         {
             if (lastInput != target.input)
             {
-                activeTweens.Remove(target);
-                mAudioSource.Stop();
-                mAnimator.enabled = false;
+                if (validateInput(lastInput, true))
+                {
+                    AddTween(target.Target, lastInput);
+                    activeTweens.Remove(target);
+                }
+                else
+                {
+                    // Stop movement and sound
+                    activeTweens.Remove(target);
+                    mAudioSource.Stop();
+                    mAnimator.enabled = false;
+                }
             }
             else
             {
                 Transform lastTarget = target.Target;
                 currentInput = target.input;
+
+                // remove last movement tween
                 activeTweens.Remove(target);
+
+                // continue in same direction
                 AddTween(lastTarget, currentInput);
             }
         }
@@ -190,7 +211,8 @@ public class PacStudentController : MonoBehaviour
     public bool TweenExists(Transform target)
     {
         // Linq instead of loop
-        CarModel tween = activeTweens.Find(x => x.Target == target);
+        //CarModel tween = activeTweens.Find(x => x.input == lastInput);
+        CarModel tween = activeTweens.Find(x => x.Target== target);
 
         if (tween != null)
         {
@@ -202,11 +224,13 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    public bool validateInput(KeyCode input)
+    public bool validateInput(KeyCode input, bool isTest = false)
     {
-
+        // starting position
         int row = 1;
         int col = 1;
+
+        // Update row and column according to user input
         if (input == KeyCode.D)
         {
             row = currPosition[0];
@@ -229,6 +253,10 @@ public class PacStudentController : MonoBehaviour
             col = currPosition[1];
         }
 
+        // check for tunnel entrance
+        // true = entered from left
+        // false = entered from right
+
         if (row == 14 || row == 15)
         {
             if (col == 0)
@@ -246,6 +274,7 @@ public class PacStudentController : MonoBehaviour
         int code;
         try
         {
+            // get element from level map (pellet, power pellet or walls)
             code = Constants.FulllevelMap[row, col];
         }
         catch (System.Exception)
@@ -253,16 +282,25 @@ public class PacStudentController : MonoBehaviour
             code = -1;
         }
 
-        bool status = checkValidation(code);
-        if (status)
+        // Check if car(pacStudent) can move or not 
+        bool status = checkValidation(code, row, col);
+        if (status && !isTest)
         {
+            particleEffect.Play();
             updateLastPosition(row, col);
         }
+        else
+        {
+            particleEffect.Stop();
+        }
+
+        // Count total pellet left
+        checkTotalPellet();
 
         return status;
     }
 
-    public bool checkValidation(int code)
+    public bool checkValidation(int code, int row, int col)
     {
         switch (code)
         {
@@ -275,9 +313,11 @@ public class PacStudentController : MonoBehaviour
                 return false;
             case 5:
                 pelletEaten.Play();
+                Constants.FulllevelMap[row, col] = 0;
                 return true;
             case 6:
                 powerPelletEaten.Play();
+                Constants.FulllevelMap[row, col] = 0;
                 return true;
             case 0:
                 return true;
@@ -304,11 +344,11 @@ public class PacStudentController : MonoBehaviour
         float xPos;
         if (isEnteredFromLeft)
         {
-            xPos = 3.853715f + Constants.xPos_Delta;
+            xPos = 4.1f + Constants.xPos_Delta;
         }
         else
         {
-            xPos = -3.721889f - Constants.xPos_Delta;
+            xPos = -4.1f - Constants.xPos_Delta;
         }
 
         gameObject.transform.position = new Vector3(xPos, gameObject.transform.position.y, gameObject.transform.position.z);
@@ -316,6 +356,7 @@ public class PacStudentController : MonoBehaviour
 
     public void respawn()
     {
+        particleEffect.Stop();
         activeTweens = new List<CarModel>();
         transform.position = carBeginningPosition;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, 270));
@@ -327,5 +368,22 @@ public class PacStudentController : MonoBehaviour
     public void stopMovement()
     {
         activeTweens.Clear();
+    }
+
+    public void checkTotalPellet()
+    {
+        int totalPellet = 0;
+        for (int i = 0; i < Constants.FulllevelMap.GetLength(0); i++)
+        {
+            for (int j = 0; j < Constants.FulllevelMap.GetLength(1); j++)
+            {
+                if (Constants.FulllevelMap[i, j] == 5)
+                {
+                    totalPellet += 1;
+                }
+            }
+        }
+
+        Constants.pelletLeft = totalPellet;
     }
 }

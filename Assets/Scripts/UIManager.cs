@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     Text scoreField;
     Text highscoreField;
     Text highscoreTimeField;
+    Text pelletLeftField;
 
     private float gameTimer = 0.0f;
     public bool isGhostTimerStarted = false;
@@ -127,6 +128,13 @@ public class UIManager : MonoBehaviour
                 countdownField = countDown.GetComponent<Text>();
             }
 
+            GameObject pelletLeft = GameObject.FindGameObjectWithTag("Text-Pellet-Left");
+            if (pelletLeft != null)
+            {
+                pelletLeftField = pelletLeft.GetComponent<Text>();
+            }
+
+
             StartCoroutine("startCountdown");
         }
     }
@@ -200,7 +208,6 @@ public class UIManager : MonoBehaviour
         if (ghostScaredTimerField != null && !isGhostTimerStarted)
         {
             StartCoroutine("ghostScareCountdown");
-
         }
 
     }
@@ -210,6 +217,11 @@ public class UIManager : MonoBehaviour
         if (scoreField != null)
         {
             scoreField.text = string.Format("Score: {0}", Constants.currentScore.ToString());
+        }
+
+        if (pelletLeftField != null)
+        {
+            pelletLeftField.text = string.Format("Pellet Left: {0}", Constants.pelletLeft.ToString());
         }
     }
 

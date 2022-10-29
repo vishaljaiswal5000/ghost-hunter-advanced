@@ -17,9 +17,7 @@ public class UpdateScore : MonoBehaviour
         if (collision.tag == "Normal-Pellet")
         {
             //update score
-            updateScore(10);
-            // remove pellet from map
-            Constants.FulllevelMap[Constants.levelMaplastPos[0], Constants.levelMaplastPos[1]] = 0;
+            updateScore(10);            
             //remove pellet
             Destroy(collision.gameObject);
         }
@@ -27,9 +25,7 @@ public class UpdateScore : MonoBehaviour
         {
             // Scare ghost state
             // Start 10 time
-            Constants.isGhostScared = true;
-            // remove pellet from map
-            Constants.FulllevelMap[Constants.levelMaplastPos[0], Constants.levelMaplastPos[1]] = 0;
+            Constants.isGhostScared = true;            
             //remove pellet
             Destroy(collision.gameObject);
         }
@@ -70,6 +66,12 @@ public class UpdateScore : MonoBehaviour
     public void updateScore(int points)
     {
         Constants.currentScore += points;
+
+        //All pellet eaten
+        if(Constants.pelletLeft == 0)
+        {
+            StartCoroutine("gameOver");
+        }
     }
 
 
