@@ -13,11 +13,12 @@ public class LoadAssets : MonoBehaviour
     public GameObject bonusPellet;
     public GameObject carLifeIndicator;
     public GameObject bonusPelletIndicator;
-    private GameObject carInstance;
+    //private GameObject carInstance;
 
     public AudioSource backgroundIntro;
     public AudioSource ghostScared;
-    
+
+    public GameObject panelLife;
 
     // Constants
     const float xPositionDelta = 0.550f;
@@ -28,7 +29,9 @@ public class LoadAssets : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetupGhost();                
+        panelLife = GameObject.FindGameObjectWithTag("Panel-Lives");
+        SetupGhost();
+        //SetupIndicators();
     }
 
     // Update is called once per frame
@@ -40,8 +43,8 @@ public class LoadAssets : MonoBehaviour
             backgroundIntro.Stop();
 
             // Instantiating car 
-            carInstance = Instantiate(car, car.transform.position, car.transform.rotation);
-            
+            //carInstance = Instantiate(car, car.transform.position, car.transform.rotation);
+            Instantiate(car, car.transform.position, car.transform.rotation);
             // Playing car background music
             //backgroundNormal.Play();
 
@@ -62,16 +65,19 @@ public class LoadAssets : MonoBehaviour
     // Showing Life and bonus indicators in the bottom of the level
     public void SetupIndicators()
     {
-        float currX = 0;
+        float currY = 0;
         // Create indicators as per defined in the totalLife variable
         for (int i = 0; i < totalLife; i++)
         {
-            Instantiate(carLifeIndicator, new Vector3(carLifeIndicator.transform.position.x + currX, carLifeIndicator.transform.position.y, carLifeIndicator.transform.position.z), car.transform.rotation).name = "Power Indicator " + (i + 1);
-            currX += xPositionDelta;
+            GameObject life = Instantiate(carLifeIndicator, new Vector3(carLifeIndicator.transform.position.x, carLifeIndicator.transform.position.y - currY, carLifeIndicator.transform.position.z), car.transform.rotation);
+            life.name = "Life-" + (i + 1);
+            life.transform.parent = panelLife.transform;
+
+            currY += 24.5f;
         }
 
         // Show Cherry/Nos Bottle in the Bottom-right corner of the level layout
-        Instantiate(bonusPellet, bonusPellet.transform.position, bonusPellet.transform.rotation);
+        //Instantiate(bonusPellet, bonusPellet.transform.position, bonusPellet.transform.rotation);
     }
     
     // Instantiating ghost in the level

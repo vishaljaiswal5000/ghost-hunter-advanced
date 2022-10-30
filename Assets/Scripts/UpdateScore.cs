@@ -1,9 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UpdateScore : MonoBehaviour
 {
+    PacStudentController pacStudentController;
+    private void Start()
+    {
+        pacStudentController = gameObject.GetComponent<PacStudentController>();
+    }
+
+    // Manage collisions Triggers
     private void OnTriggerEnter2D(Collider2D collision)
     {
         //Debug.Log(Constants.levelMaplastPos[0]+", "+ Constants.levelMaplastPos[1]);
@@ -11,8 +20,14 @@ public class UpdateScore : MonoBehaviour
         {
             //update score
             updateScore(10);
-            // remove pellet from map
-            Constants.FulllevelMap[Constants.levelMaplastPos[0], Constants.levelMaplastPos[1]] = 0;
+
+            pacStudentController.checkTotalPellet();
+
+            //All pellet eaten
+            if (Constants.pelletLeft == 0)
+            {
+                StartCoroutine("gameOver");
+            }
             //remove pellet
             Destroy(collision.gameObject);
         }
@@ -20,9 +35,7 @@ public class UpdateScore : MonoBehaviour
         {
             // Scare ghost state
             // Start 10 time
-            Constants.isGhostScared = true;
-            // remove pellet from map
-            Constants.FulllevelMap[Constants.levelMaplastPos[0], Constants.levelMaplastPos[1]] = 0;
+            Constants.isGhostScared = true;            
             //remove pellet
             Destroy(collision.gameObject);
         }
@@ -35,11 +48,112 @@ public class UpdateScore : MonoBehaviour
             //remove pellet
             Destroy(collision.gameObject);
         }
+        else if (collision.tag.Contains("ghost"))
+        {
+            if (Constants.isGhostScared)
+            {
+                updateScore(300);
+                //play ghost dead sound
+                GhostAnimator ghostAnimator = collision.gameObject.GetComponent<GhostAnimator>();
+                //respawn/walking transition after 5 second
+                ghostAnimator.isDead = true;
+                ghostAnimator.ghostDead.Play();
+
+            }
+            else
+            {
+                // play car wreck sound
+                pacStudentController.carWreck.Play();
+                // respawn to original location
+                pacStudentController.respawn();
+                //remove one life
+                updateLife();
+            }
+
+        }
     }
 
+    // Update player score in constants (shared) class 
     public void updateScore(int points)
     {
-        Constants.currentScore += points;
+        Constants.currentScore += points;       
     }
 
+
+    // Update player lives
+    public void updateLife()
+    {
+        GameObject panelLives = GameObject.FindGameObjectWithTag("Panel-Lives");
+        if (panelLives != null)
+        {
+            if (panelLives.transform.childCount > 0)
+            {
+                Destroy(panelLives.transform.GetChild(panelLives.transform.childCount - 1).gameObject);
+            }
+            else
+            {
+                StartCoroutine("gameOver");
+            }
+        }
+    }
+
+    // Perform game over procedure
+    IEnumerator gameOver()
+    {
+        //Stop all movement
+        pacStudentController.stopMovement();
+        //Stop timer
+        Constants.isGameOver = true;
+        // Save Score
+        saveHighScore();
+
+        //Show game over text for 3 seconds and switch to start menu
+        GameObject gameoverObj = GameObject.FindGameObjectWithTag("Text-Gameover");
+        GameObject managersObj = GameObject.FindGameObjectWithTag("Managers");
+        if (gameoverObj != null)
+        {
+            gameoverObj.GetComponent<Text>().text = "Game Over";
+            yield return new WaitForSeconds(3);
+            gameoverObj.GetComponent<Text>().text = "";
+            AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(0);
+            reset();           
+        }
+        yield return null;
+    }
+
+    // verify and Save high score in PlayerPrefs
+    public void saveHighScore()
+    {
+        if (PlayerPrefs.HasKey(Constants.highscoreKey))
+        {
+            if (PlayerPrefs.GetInt(Constants.highscoreKey) < Constants.currentScore)
+            {
+                commitSave();
+            }
+        }
+        else
+        {
+            commitSave();
+        }
+    }
+
+    // Save score in playerPrefs
+    public void commitSave()
+    {
+        PlayerPrefs.SetInt(Constants.highscoreKey, Constants.currentScore);
+        PlayerPrefs.SetFloat(Constants.timeKey, Constants.playerGameTime);
+        PlayerPrefs.Save();
+    }
+
+    // Reset game settings
+    public void reset()
+    {
+        Constants.isGameOver = false;
+        Constants.currentScore = 0;
+        Constants.playerGameTime = 0f;
+        LoadAssets.isIntroCompleted = false;
+        pacStudentController.updateLastPosition(1, 1);
+        pacStudentController.currPosition[0] = 1;
+        pacStudentController.currPosition[1] = 1;
+    }
 }
