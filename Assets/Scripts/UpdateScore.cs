@@ -14,8 +14,7 @@ public class UpdateScore : MonoBehaviour
 
     // Manage collisions Triggers
     private void OnTriggerEnter2D(Collider2D collision)
-    {
-        //Debug.Log(Constants.levelMaplastPos[0]+", "+ Constants.levelMaplastPos[1]);
+    {        
         if (collision.tag == "Normal-Pellet")
         {
             //update score
