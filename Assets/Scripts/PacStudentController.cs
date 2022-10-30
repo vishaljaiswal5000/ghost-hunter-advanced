@@ -80,7 +80,7 @@ public class PacStudentController : MonoBehaviour
                 else
                 {
                     mAudioSource.Stop();
-                    mAnimator.enabled = false;
+                    mAnimator.enabled = true;
                 }
             }
         }
@@ -356,13 +356,22 @@ public class PacStudentController : MonoBehaviour
 
     public void respawn()
     {
+        StartCoroutine("respawning");
+    }
+
+    IEnumerator respawning()
+    {
         particleEffect.Stop();
+        mAnimator.SetBool("isDead", true);
+        yield return new WaitForSeconds(2);
+        mAnimator.SetBool("isDead", false);
         activeTweens = new List<CarModel>();
         transform.position = carBeginningPosition;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, 270));
         updateLastPosition(1, 1);
         currPosition[0] = 1;
         currPosition[1] = 1;
+        yield return null;
     }
 
     public void stopMovement()
