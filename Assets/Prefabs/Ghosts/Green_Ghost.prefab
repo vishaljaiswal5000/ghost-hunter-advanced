@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5205125007729003405}
   - component: {fileID: 1400188851500419433}
   - component: {fileID: 5462862309355204425}
+  - component: {fileID: 8040134209761267639}
   m_Layer: 0
   m_Name: Green_Ghost
   m_TagString: ghost2
@@ -29,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1051160995861051038}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.6, y: -0.4, z: 0}
+  m_LocalPosition: {x: -0.8089986, y: -0.5214998, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3130669430363134957}
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &424946690760489137
 SpriteRenderer:
@@ -121,6 +122,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3e829e2964c8d943a651e0e1b1c9f2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isDead: 0
+  ghostDead: {fileID: 0}
 --- !u!50 &1400188851500419433
 Rigidbody2D:
   serializedVersion: 4
@@ -168,6 +171,20 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.8, y: 0.64}
   m_EdgeRadius: 0
+--- !u!114 &8040134209761267639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051160995861051038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6284deca1b770544c84bf457d481b1f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lastInput: 0
+  currentInput: 0
 --- !u!1 &6510459784725706715
 GameObject:
   m_ObjectHideFlags: 0

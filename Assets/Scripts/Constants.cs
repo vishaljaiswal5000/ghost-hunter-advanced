@@ -57,8 +57,7 @@ public class Constants
 
     // total pellets
     public static int pelletLeft = 220;
-
-
+        
     public static void init(int[,] originalFulllevelMap)
     {
         FulllevelMap = originalFulllevelMap;
