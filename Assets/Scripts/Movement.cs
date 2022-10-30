@@ -5,7 +5,6 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     public CarModel carModel;
-
     public Vector3 startPos1;
     public Vector3 endPos1;
 
@@ -21,18 +20,13 @@ public class Movement : MonoBehaviour
     Vector3 start;
     Vector3 end;
     float startTime;
-    public float duration = 1.2f;
+    public float duration = 0.5f;
     private Animator mAnimator;
-    public void initMovement(CarModel carModel)
-    {
-        this.carModel = carModel;
-        mAnimator = this.carModel.Target.GetComponent<Animator>();
-    }
-
 
     void Start()
-    {       
-      
+    {
+        carModel = new CarModel(transform, transform.position, transform.position, Time.time, 1.5f, KeyCode.Return);
+        init();
     }
 
 
@@ -51,7 +45,7 @@ public class Movement : MonoBehaviour
     public IEnumerator StartMovement()
     {
         // For Assigment 3 only - Checking if car is wrecked/dead by animation parameter
-        if (!mAnimator.GetBool("isDead"))
+        if (carModel != null)
         {
             //between vector A and B
             float distance = Vector3.Distance(start, end);
@@ -61,7 +55,7 @@ public class Movement : MonoBehaviour
 
             // Updating position
             if (completed > 1)
-            {
+            {                
                 if (start == startPos1)
                 {
                     carModel.Target.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 270.0f));
@@ -83,8 +77,10 @@ public class Movement : MonoBehaviour
                 else
                 {
                     carModel.Target.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
+                    init();
                     start = startPos1;
                     end = endPos1;
+
                 }
 
                 startTime = 0.0f;
@@ -97,5 +93,34 @@ public class Movement : MonoBehaviour
         }
         yield return null;
     }
-   
+
+    // initializing position variables 
+    public void init()
+    {
+        float minX = 100f, minY = 100f, maxX = 900f, maxY = 500f;
+
+
+        maxX = Screen.width - 50f;
+        maxY = Screen.height - 50f;
+
+        startPos1 = new Vector3(minX, minY, 0.0f);
+        endPos1 = new Vector3(minX, maxY, 0.0f);
+
+        startPos2 = endPos1;
+        endPos2 = new Vector3(maxX, maxY, 0.0f);
+
+        startPos3 = endPos2;
+        endPos3 = new Vector3(maxX, minY, 0.0f);
+
+        startPos4 = endPos3;
+        endPos4 = startPos1;
+
+        transform.position = startPos1;
+        transform.rotation = Quaternion.identity;
+
+        startTime = 1.5f;
+        start = startPos1;
+        end = endPos1;
+    }
+
 }

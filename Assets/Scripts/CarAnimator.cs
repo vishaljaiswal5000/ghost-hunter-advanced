@@ -42,8 +42,6 @@ public class CarAnimator : MonoBehaviour
     // Finding Gameobject Car and Fetching its animator
     IEnumerator getCar()
     {
-        yield return new WaitForSeconds(6);
-
         car = GameObject.Find("Car(Clone)");
         if (car)
         {
