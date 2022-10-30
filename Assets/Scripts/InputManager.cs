@@ -10,12 +10,14 @@ public class InputManager : MonoBehaviour
     
     private void Update()
     {
+        // load car after completion of intro
         if (car == null && LoadAssets.isIntroCompleted && SceneManager.GetActiveScene().buildIndex == 1)
         {
             car = GameObject.FindGameObjectWithTag("Car");
             this.pacStudentController = car.GetComponent<PacStudentController>();
         }
 
+        // Control pacstudent movement until game is over.
         if (car != null && !Constants.isGameOver)
         {
 

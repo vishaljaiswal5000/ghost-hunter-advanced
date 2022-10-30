@@ -11,6 +11,8 @@ public class UpdateScore : MonoBehaviour
     {
         pacStudentController = gameObject.GetComponent<PacStudentController>();
     }
+
+    // Manage collisions Triggers
     private void OnTriggerEnter2D(Collider2D collision)
     {
         //Debug.Log(Constants.levelMaplastPos[0]+", "+ Constants.levelMaplastPos[1]);
@@ -20,6 +22,12 @@ public class UpdateScore : MonoBehaviour
             updateScore(10);
 
             pacStudentController.checkTotalPellet();
+
+            //All pellet eaten
+            if (Constants.pelletLeft == 0)
+            {
+                StartCoroutine("gameOver");
+            }
             //remove pellet
             Destroy(collision.gameObject);
         }
@@ -65,18 +73,14 @@ public class UpdateScore : MonoBehaviour
         }
     }
 
+    // Update player score in constants (shared) class 
     public void updateScore(int points)
     {
-        Constants.currentScore += points;
-
-        //All pellet eaten
-        if(Constants.pelletLeft == 0)
-        {
-            StartCoroutine("gameOver");
-        }
+        Constants.currentScore += points;       
     }
 
 
+    // Update player lives
     public void updateLife()
     {
         GameObject panelLives = GameObject.FindGameObjectWithTag("Panel-Lives");
@@ -93,6 +97,7 @@ public class UpdateScore : MonoBehaviour
         }
     }
 
+    // Perform game over procedure
     IEnumerator gameOver()
     {
         //Stop all movement
@@ -111,16 +116,12 @@ public class UpdateScore : MonoBehaviour
             yield return new WaitForSeconds(3);
             gameoverObj.GetComponent<Text>().text = "";
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(0);
-            reset();
-            //if (managersObj != null)
-            //{
-            //SceneManager.sceneLoaded += managersObj.GetComponent<UIManager>().OnSceneLoaded;
-            //}
-            //SceneManager.sceneLoaded += OnSceneLoaded;
+            reset();           
         }
         yield return null;
     }
 
+    // verify and Save high score in PlayerPrefs
     public void saveHighScore()
     {
         if (PlayerPrefs.HasKey(Constants.highscoreKey))
@@ -136,6 +137,7 @@ public class UpdateScore : MonoBehaviour
         }
     }
 
+    // Save score in playerPrefs
     public void commitSave()
     {
         PlayerPrefs.SetInt(Constants.highscoreKey, Constants.currentScore);
@@ -143,11 +145,15 @@ public class UpdateScore : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    // Reset game settings
     public void reset()
     {
         Constants.isGameOver = false;
         Constants.currentScore = 0;
         Constants.playerGameTime = 0f;
         LoadAssets.isIntroCompleted = false;
+        pacStudentController.updateLastPosition(1, 1);
+        pacStudentController.currPosition[0] = 1;
+        pacStudentController.currPosition[1] = 1;
     }
 }

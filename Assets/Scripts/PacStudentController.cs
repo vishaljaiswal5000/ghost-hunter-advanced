@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class PacStudentController : MonoBehaviour
 {
+    // Declaring variables
     public CarModel carModel;
-    public KeyCode lastInput;
-    public KeyCode currentInput;
+
     private Animator mAnimator;
     private AudioSource mAudioSource;
-
     public AudioSource carCollide;
     public AudioSource pelletEaten;
     public AudioSource powerPelletEaten;
     public AudioSource carWreck;
 
+    public KeyCode lastInput;
+    public KeyCode currentInput;
     private List<CarModel> activeTweens = new List<CarModel>();
     public GameObject BonusPellet;
 
@@ -22,6 +23,8 @@ public class PacStudentController : MonoBehaviour
     public int[] currPosition;
     public Vector3 carBeginningPosition;
     public Vector3 carBeginningRotation;
+
+    // initiating game variables
     public void init()
     {
         // Update starting position
@@ -62,6 +65,8 @@ public class PacStudentController : MonoBehaviour
         carMovement();
     }
 
+
+    // manage all tweens and start movement
     public void carMovement()
     {
         for (int i = 0; i < activeTweens.Count; i++)
@@ -86,6 +91,7 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
+    // Perform Interpolation
     public void startLerp(CarModel target)
     {
         // calculate distance between start and end position 
@@ -94,6 +100,7 @@ public class PacStudentController : MonoBehaviour
 
         if (timeFraction > 1)
         {
+            target.Target.position = target.EndPos;
             if (lastInput != target.input)
             {
                 if (validateInput(lastInput, true))
@@ -127,10 +134,7 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    public float EaseIn(float t)
-    {
-        return Mathf.Pow(t, 3);
-    }
+    // Verify and Add tween in the list
     public bool AddTween(Transform targetObject, KeyCode input)
     {
         if (!TweenExists(targetObject))
@@ -151,6 +155,7 @@ public class PacStudentController : MonoBehaviour
         return false;
     }
 
+    // Resolve user inputs
     public CarModel resolveInput(Transform targetObject, KeyCode input)
     {
         CarModel car;
@@ -180,6 +185,7 @@ public class PacStudentController : MonoBehaviour
         return car;
     }
 
+    // Upon user input, calculate and provide new positions
     public CarModel moveLeft(Transform targetObject)
     {
         Vector3 endPos = new Vector3(targetObject.position.x - Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
@@ -208,6 +214,7 @@ public class PacStudentController : MonoBehaviour
         return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.S);
     }
 
+    // Check if tween exists in the list
     public bool TweenExists(Transform target)
     {
         // Linq instead of loop
@@ -224,6 +231,8 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
+
+    // Validate user input is executable or not
     public bool validateInput(KeyCode input, bool isTest = false)
     {
         // starting position
@@ -256,7 +265,6 @@ public class PacStudentController : MonoBehaviour
         // check for tunnel entrance
         // true = entered from left
         // false = entered from right
-
         if (row == 14 || row == 15)
         {
             if (col == 0)
@@ -294,12 +302,10 @@ public class PacStudentController : MonoBehaviour
             particleEffect.Stop();
         }
 
-        // Count total pellet left
-        //checkTotalPellet();
-
         return status;
     }
 
+    // Check whether next position is feasible to move
     public bool checkValidation(int code, int row, int col)
     {
         switch (code)
@@ -328,17 +334,20 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
+    // Update current pacstudent position
     public void updateLastPosition(int row, int col)
     {
         Constants.levelMaplastPos[0] = currPosition[0] = row;
         Constants.levelMaplastPos[1] = currPosition[1] = col;
     }
 
+    // Spawn bonus pellet
     public void spawnBonusPellet()
     {
         Instantiate(BonusPellet, Vector3.zero, BonusPellet.transform.rotation);
     }
 
+    // Teleport pacstudent through tunnel
     public void teleport(bool isEnteredFromLeft)
     {
         float xPos;
@@ -354,11 +363,13 @@ public class PacStudentController : MonoBehaviour
         gameObject.transform.position = new Vector3(xPos, gameObject.transform.position.y, gameObject.transform.position.z);
     }
 
+    // Start coroutine of Respawn pacstudent 
     public void respawn()
     {
         StartCoroutine("respawning");
     }
 
+    // Respawn pacstudent after dead state
     IEnumerator respawning()
     {
         particleEffect.Stop();
@@ -374,11 +385,13 @@ public class PacStudentController : MonoBehaviour
         yield return null;
     }
 
+    // Stop all movements
     public void stopMovement()
     {
         activeTweens.Clear();
     }
 
+    // Count all available pellets in the game level
     public void checkTotalPellet()
     {
         int totalPellet = 0;
