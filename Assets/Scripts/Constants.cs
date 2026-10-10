@@ -77,12 +77,18 @@ public class Constants
 
     // Seconds per tile (lesser is faster)
     public static float carMovementDuration = 0.25f;
-    public static float ghostMovementDuration = 0.28f;
-    public static float scaredGhostMovementDuration = 0.4f;
     public static float deadGhostMovementDuration = 0.12f;
 
+    // Level 1 or 2 (picked on the start screen); level 2 has faster, more aggressive ghosts
+    public static int level = 1;
+    public static bool IsLevelTwo { get { return level == 2; } }
+    public static float ghostMovementDuration { get { return IsLevelTwo ? 0.22f : 0.28f; } }
+    public static float scaredGhostMovementDuration { get { return IsLevelTwo ? 0.34f : 0.4f; } }
+    public static float scaredTotalTime { get { return IsLevelTwo ? 6f : 10f; } }
+    public static float scatterTime { get { return IsLevelTwo ? 4f : 7f; } }
+    public static float chaseTime { get { return IsLevelTwo ? 30f : 20f; } }
+
     public const int totalLives = 3;
-    public const float scaredTotalTime = 10f;
     public const float scaredRecoveringTime = 3f;
 
     // Game state

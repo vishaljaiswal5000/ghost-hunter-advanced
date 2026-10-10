@@ -70,14 +70,19 @@ public class UIManager : MonoBehaviour
 
     public void onLevelOneClick()
     {
-        DontDestroyOnLoad(gameObject);
-        StartCoroutine("loadScene", 1);
-
+        startLevel(1);
     }
 
     public void onLevelTwoClick()
     {
+        startLevel(2);
+    }
 
+    void startLevel(int level)
+    {
+        Constants.level = level;
+        DontDestroyOnLoad(gameObject);
+        StartCoroutine("loadScene", 1);
     }
 
     public void QuitGame()

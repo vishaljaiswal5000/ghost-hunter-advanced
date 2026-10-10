@@ -12,7 +12,7 @@ public enum GhostState
 //   Red    - chases PacStudent directly
 //   Blue   - aims 4 tiles ahead of PacStudent
 //   Yellow - chases when far away, retreats to a corner when close
-//   Green  - wanders randomly
+//   Green  - wanders randomly (hunts directly on level 2)
 // Scared ghosts wander randomly and slowly, eaten ghosts take the shortest path back to the pen.
 public class GhostController : MonoBehaviour
 {
@@ -161,7 +161,7 @@ public class GhostController : MonoBehaviour
         }
         if (options.Count == 1) return options[0];
 
-        if (IsScared || personality == Personality.Green)
+        if (IsScared || (personality == Personality.Green && !Constants.IsLevelTwo))
         {
             return options[Random.Range(0, options.Count)];
         }
@@ -183,10 +183,10 @@ public class GhostController : MonoBehaviour
         return best;
     }
 
-    // Ghosts alternate: 7 seconds heading for their home corner, then 20 seconds of hunting
+    // Ghosts alternate between heading for their home corner and hunting (durations depend on the level)
     private static bool IsScatterPhase()
     {
-        return (Time.timeSinceLevelLoad - 4f) % 27f < 7f;
+        return (Time.timeSinceLevelLoad - 4f) % (Constants.scatterTime + Constants.chaseTime) < Constants.scatterTime;
     }
 
     private Vector2Int TargetCell()
