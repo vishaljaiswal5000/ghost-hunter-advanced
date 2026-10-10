@@ -89,6 +89,10 @@ public class UIManager : MonoBehaviour
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_WEBGL
+        // a browser tab can't quit: go back to the start screen instead
+        Constants.init();
+        SceneManager.LoadScene(0);
 #else
         Application.Quit();
 #endif

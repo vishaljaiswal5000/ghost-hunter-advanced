@@ -37,6 +37,8 @@ public class LoadAssets : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        FitCamera();
+
         // intro lasts 4 seconds (matches the 3-2-1-Go countdown)
         if (!isIntroCompleted && Time.timeSinceLevelLoad > 4.0f)
         {
@@ -60,6 +62,16 @@ public class LoadAssets : MonoBehaviour
         if (!Constants.isGhostScared)
         {
             ghostScared.Stop();
+        }
+    }
+
+    // Keep the whole maze (about 9.8 units wide, 10 tall) visible on narrow / portrait screens
+    void FitCamera()
+    {
+        Camera cam = Camera.main;
+        if (cam != null && cam.orthographic)
+        {
+            cam.orthographicSize = Mathf.Max(5f, 4.9f / cam.aspect);
         }
     }
 
