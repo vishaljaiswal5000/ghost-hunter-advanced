@@ -1,371 +1,291 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GhostState
+{
+    InPen,   // waiting in / leaving the ghost pen
+    Normal,  // roaming the maze (scared or not, see IsScared)
+    Dead     // eaten, eyes heading back to the pen
+}
+
+// Tile-based ghost with a personality per colour:
+//   Red    - chases PacStudent directly
+//   Blue   - aims 4 tiles ahead of PacStudent
+//   Yellow - chases when far away, retreats to a corner when close
+//   Green  - wanders randomly
+// Scared ghosts wander randomly and slowly, eaten ghosts take the shortest path back to the pen.
 public class GhostController : MonoBehaviour
 {
-    Vector3 startPos;
-    int[] currLocation = new int[2];
-    Vector3 lastPos;
-    private Animator mAnimator;
-    private List<CarModel> activeTweens = new List<CarModel>();
+    private enum Personality { Red, Blue, Yellow, Green }
 
+    public GhostState state = GhostState.InPen;
 
-    public KeyCode lastInput;
-    public KeyCode currentInput;
+    private Personality personality;
+    private int startRow, startCol;
+    private float releaseDelay;
 
+    private int row, col;
+    private int dir = -1;
+    private bool moving;
+    private bool wrapStep;
+    private int fromRow, fromCol, toRow, toCol;
+    private Vector3 fromPos, toPos;
+    private float progress;
+    private float z;
 
-    // Start is called before the first frame update
+    private float waitUntil = -1f;
+    private int eatenScare = -1;    // scare this ghost was already eaten in
+    private int seenScare;
+
+    private readonly List<int> options = new List<int>(4);
+
+    // Scared (and not yet eaten in this scare)
+    public bool IsScared
+    {
+        get { return state == GhostState.Normal && Constants.isGhostScared && eatenScare != Constants.scareCounter; }
+    }
+
     void Start()
     {
-        mAnimator = gameObject.GetComponent<Animator>();
         init();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        ghostMovement();
-    }
-
-    // manage all tweens and start movement
-    public void ghostMovement()
-    {
-        for (int i = 0; i < activeTweens.Count; i++)
-        {
-            if (activeTweens[i] != null)
-            {
-                if (!mAnimator.GetBool("isDead"))
-                {
-                    mAnimator.enabled = true;
-                    startLerp(activeTweens[i]);
-                }
-                else
-                {
-                    mAnimator.enabled = true;
-                }
-            }
-        }
-    }
-
-    // Perform Interpolation
-    public void startLerp(CarModel target)
-    {
-        // calculate distance between start and end position 
-        float distance = Vector3.Distance(target.StartPos, target.EndPos);
-        float timeFraction = (Time.time - target.StartTime) / target.Duration;
-
-        if (timeFraction > 1)
-        {
-            target.Target.position = target.EndPos;
-            Transform tempTarget = target.Target;
-            activeTweens.Remove(target);
-            createTween();
-        }
-        else
-        {
-            target.Target.position = Vector3.Lerp(target.StartPos, target.EndPos, timeFraction);
-        }
     }
 
     public void init()
     {
-        if (gameObject.name.Contains("Blue"))
-        {
-            currLocation[0] = 13;
-            currLocation[1] = 16;
-        }
-        else if (gameObject.name.Contains("Green"))
-        {
-            currLocation[0] = 16;
-            currLocation[1] = 11;
-        }
-        else if (gameObject.name.Contains("Yellow"))
-        {
-            currLocation[0] = 13;
-            currLocation[1] = 11;
-        }
-        else if (gameObject.name.Contains("Red"))
-        {
-            currLocation[0] = 16;
-            currLocation[1] = 16;
-        }
+        string n = gameObject.name;
+        if (n.Contains("Blue")) { personality = Personality.Blue; startRow = 13; startCol = 16; releaseDelay = 1.5f; }
+        else if (n.Contains("Green")) { personality = Personality.Green; startRow = 16; startCol = 11; releaseDelay = 4.5f; }
+        else if (n.Contains("Yellow")) { personality = Personality.Yellow; startRow = 13; startCol = 11; releaseDelay = 3f; }
+        else { personality = Personality.Red; startRow = 16; startCol = 16; releaseDelay = 0f; }
 
-        startPos = gameObject.transform.position;
-        createTween();
-
+        z = transform.position.z;
+        ResetToPen();
     }
 
-    public void createTween()
+    private void ResetToPen()
     {
-        KeyCode input = randomInput();
-        if (validateInput(input, true)){
+        row = startRow;
+        col = startCol;
+        dir = -1;
+        moving = false;
+        wrapStep = false;
+        state = GhostState.InPen;
+        waitUntil = -1f;
+        seenScare = Constants.scareCounter;
+        transform.position = Cell(row, col);
+    }
 
-            bool isCreated = AddTween(gameObject.transform, input);
-            if (!isCreated)
+    void Update()
+    {
+        // ghosts stay put during the intro and after game over
+        if (!LoadAssets.isIntroCompleted || Constants.isGameOver) return;
+
+        if (waitUntil < 0f) waitUntil = Time.time + releaseDelay;
+        if (Time.time < waitUntil) return;
+
+        // a new power pellet makes everyone turn around
+        if (seenScare != Constants.scareCounter)
+        {
+            seenScare = Constants.scareCounter;
+            if (state == GhostState.Normal) Reverse();
+        }
+
+        if (moving)
+        {
+            progress += Time.deltaTime / StepDuration();
+            if (progress >= 1f) Arrive();
+            else transform.position = Vector3.Lerp(fromPos, toPos, progress);
+        }
+
+        if (!moving) Decide();
+    }
+
+    private float StepDuration()
+    {
+        if (state == GhostState.Dead) return Constants.deadGhostMovementDuration;
+        if (IsScared) return Constants.scaredGhostMovementDuration;
+        return Constants.ghostMovementDuration;
+    }
+
+    // ---- AI -----------------------------------------------------------------------------
+
+    private void Decide()
+    {
+        int next = -1;
+
+        switch (state)
+        {
+            case GhostState.InPen:
+                // shortest way out of the pen, then roam
+                next = Constants.BfsDir(row, col, (r, c) => !Constants.IsPen(r, c), true);
+                if (next < 0 && !Constants.IsPen(row, col)) state = GhostState.Normal;
+                break;
+
+            case GhostState.Dead:
+                next = Constants.BfsDir(row, col, (r, c) => r >= 14 && r <= 15 && c >= 13 && c <= 14, true);
+                if (next < 0)
+                {
+                    // home: take a short rest, then leave the pen again
+                    state = GhostState.InPen;
+                    dir = -1;
+                    waitUntil = Time.time + 1f;
+                }
+                break;
+        }
+
+        if (state == GhostState.Normal)
+        {
+            next = ChooseRoamingDir();
+        }
+
+        if (next >= 0) BeginStep(next);
+    }
+
+    private int ChooseRoamingDir()
+    {
+        options.Clear();
+        for (int d = 0; d < 4; d++)
+        {
+            int r, c;
+            bool w;
+            if (dir >= 0 && d == Constants.Opposite(dir)) continue;   // no u-turns
+            if (Constants.Step(row, col, d, false, out r, out c, out w)) options.Add(d);
+        }
+
+        if (options.Count == 0)
+        {
+            // dead end: turning back is the only way
+            if (dir >= 0 && Constants.Step(row, col, Constants.Opposite(dir), false, out int br, out int bc, out bool bw))
+                return Constants.Opposite(dir);
+            return -1;
+        }
+        if (options.Count == 1) return options[0];
+
+        if (IsScared || personality == Personality.Green)
+        {
+            return options[Random.Range(0, options.Count)];
+        }
+
+        Vector2Int target = TargetCell();
+        int best = options[0];
+        float bestDist = float.MaxValue;
+        foreach (int d in options)
+        {
+            float dr = row + Constants.dRow[d] - target.x;
+            float dc = col + Constants.dCol[d] - target.y;
+            float dist = dr * dr + dc * dc;
+            if (dist < bestDist)
             {
-                createTween();
+                bestDist = dist;
+                best = d;
             }
-        }else
-        {
-            createTween();
         }
+        return best;
     }
 
-    public CarModel moveLeft(Transform targetObject)
+    // Ghosts alternate: 7 seconds heading for their home corner, then 20 seconds of hunting
+    private static bool IsScatterPhase()
     {
-        Vector3 endPos = new Vector3(targetObject.position.x - Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.A);
+        return (Time.timeSinceLevelLoad - 4f) % 27f < 7f;
     }
 
-    public CarModel moveRight(Transform targetObject)
+    private Vector2Int TargetCell()
     {
-        Vector3 endPos = new Vector3(targetObject.position.x + Constants.xPos_Delta, targetObject.position.y, targetObject.position.z);
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.D);
-    }
+        int pr = Constants.levelMaplastPos[0];
+        int pc = Constants.levelMaplastPos[1];
 
-    public CarModel moveUp(Transform targetObject)
-    {
-        Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y - Constants.yPos_Delta, targetObject.position.z);
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.W);
-    }
-
-    public CarModel moveDown(Transform targetObject)
-    {
-        Vector3 endPos = new Vector3(targetObject.position.x, targetObject.position.y + Constants.yPos_Delta, targetObject.position.z);
-        return new CarModel(targetObject, targetObject.position, endPos, Time.time, Constants.carMovementDuration, KeyCode.S);
-    }
-
-
-    // Validate user input is executable or not
-    public bool validateInput(KeyCode input, bool isTest = false)
-    {
-        // starting position
-        int row = 1;
-        int col = 1;
-
-        // Update row and column according to user input
-        if (input == KeyCode.D)
+        if (IsScatterPhase())
         {
-            row = currLocation[0];
-            col = currLocation[1] + 1;
-
-        }
-        else if (input == KeyCode.A)
-        {
-            row = currLocation[0];
-            col = currLocation[1] - 1;
-        }
-        else if (input == KeyCode.W)
-        {
-            row = currLocation[0] - 1;
-            col = currLocation[1];
-        }
-        else if (input == KeyCode.S)
-        {
-            row = currLocation[0] + 1;
-            col = currLocation[1];
-        }
-
-        // check for tunnel entrance
-        // true = entered from left
-        // false = entered from right
-        if (row == 14 || row == 15)
-        {
-            if (col == 0)
+            switch (personality)
             {
-                col = 27;
-                teleport(true);
-            }
-            else if (col == 27)
-            {
-                col = 0;
-                teleport(false);
-            }
-        }
-
-        int code;
-        try
-        {
-            // get element from level map (pellet, power pellet or walls)
-            code = Constants.FulllevelMap[row, col];
-        }
-        catch (System.Exception)
-        {
-            code = -1;
-        }
-
-        // Check if car(pacStudent) can move or not 
-        bool status = checkValidation(code, row, col);
-
-        if (status && !isTest)
-        {
-            updateLastPosition(row, col);
-        }
-
-        return status;
-    }
-
-    // Check whether next position is feasible to move
-    public bool checkValidation(int code, int row, int col)
-    {
-        switch (code)
-        {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 7:
-                return false;
-            case 5:
-                return true;
-            case 6:
-                return true;
-            case 0:
-                return true;
-            case -1:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    // Teleport pacstudent through tunnel
-    public void teleport(bool isEnteredFromLeft)
-    {
-        float xPos;
-        if (isEnteredFromLeft)
-        {
-            xPos = 4.1f + Constants.xPos_Delta;
-        }
-        else
-        {
-            xPos = -4.1f - Constants.xPos_Delta;
-        }
-
-        gameObject.transform.position = new Vector3(xPos, gameObject.transform.position.y, gameObject.transform.position.z);
-    }
-
-    public KeyCode randomInput()
-    {
-        int selection = Random.Range(0, 4);
-        KeyCode keyCode;
-        switch (selection)
-        {
-            case 0:
-                keyCode = KeyCode.W;
-                break;
-            case 1:
-                keyCode = KeyCode.S;
-                break;
-            case 2:
-                keyCode = KeyCode.A;
-                break;
-            case 3:
-                keyCode = KeyCode.D;
-                break;
-            default:
-                keyCode = KeyCode.A;
-                break;
-        }
-
-        lastInput = keyCode;
-        return keyCode;
-    }
-
-
-    // Verify and Add tween in the list
-    public bool AddTween(Transform targetObject, KeyCode input)
-    {
-
-        if (!TweenExists(targetObject))
-        {
-            if (validateInput(input))
-            {
-                activeTweens.Add(resolveInput(targetObject, input));
-                lastInput = input;
-                return true;
-            }
-            else
-            {
-                mAnimator.enabled = false;
+                case Personality.Red: return new Vector2Int(0, Constants.Cols - 3);
+                case Personality.Blue: return new Vector2Int(Constants.Rows - 1, Constants.Cols - 2);
+                default: return new Vector2Int(Constants.Rows - 1, 1);
             }
         }
 
-        return false;
-    }
-
-    // Resolve user inputs
-    public CarModel resolveInput(Transform targetObject, KeyCode input)
-    {
-        CarModel ghost;
-        switch (input)
+        switch (personality)
         {
-            case KeyCode.W:
-                ghost = moveUp(targetObject);
-                break;
+            case Personality.Blue:
+                if (Constants.pacDir >= 0)
+                {
+                    pr += 4 * Constants.dRow[Constants.pacDir];
+                    pc += 4 * Constants.dCol[Constants.pacDir];
+                }
+                return new Vector2Int(pr, pc);
 
-            case KeyCode.S:
-                ghost = moveDown(targetObject);
-                break;
-
-            case KeyCode.A:
-                ghost = moveLeft(targetObject);
-                break;
-
-            case KeyCode.D:
-                ghost = moveRight(targetObject);
-                break;
+            case Personality.Yellow:
+                {
+                    float dr = row - pr;
+                    float dc = col - pc;
+                    if (dr * dr + dc * dc < 64f) return new Vector2Int(Constants.Rows - 2, 1);  // too close, back off to a corner
+                    return new Vector2Int(pr, pc);
+                }
 
             default:
-                ghost = moveRight(targetObject);
-                break;
+                return new Vector2Int(pr, pc);
         }
-
-        return ghost;
     }
 
+    // ---- Movement -----------------------------------------------------------------------
 
-    // Check if tween exists in the list
-    public bool TweenExists(Transform target)
+    private void BeginStep(int direction)
     {
-        // Linq instead of loop
-        //CarModel tween = activeTweens.Find(x => x.input == lastInput);
-        CarModel tween = activeTweens.Find(x => x.Target == target);
+        int nRow, nCol;
+        bool wrapped;
+        if (!Constants.Step(row, col, direction, true, out nRow, out nCol, out wrapped)) return;
 
-        if (tween != null)
+        dir = direction;
+        fromRow = row; fromCol = col;
+        toRow = nRow; toCol = nCol;
+        fromPos = Cell(row, col);
+        toPos = wrapped ? Cell(row + Constants.dRow[dir], col + Constants.dCol[dir]) : Cell(nRow, nCol);
+        wrapStep = wrapped;
+        progress = 0f;
+        moving = true;
+    }
+
+    private void Arrive()
+    {
+        row = toRow;
+        col = toCol;
+        transform.position = Cell(row, col);
+        moving = false;
+        wrapStep = false;
+
+        // once out of the pen we are a regular roaming ghost
+        if (state == GhostState.InPen && !Constants.IsPen(row, col)) state = GhostState.Normal;
+    }
+
+    private void Reverse()
+    {
+        if (dir < 0) return;
+        if (!moving)
         {
-            return true;
+            BeginStep(Constants.Opposite(dir));
+            return;
         }
-        else
-        {
-            return false;
-        }
+        if (wrapStep) return;
+
+        Vector3 tmpPos = fromPos; fromPos = toPos; toPos = tmpPos;
+        int tmpRow = fromRow; fromRow = toRow; toRow = tmpRow;
+        int tmpCol = fromCol; fromCol = toCol; toCol = tmpCol;
+        progress = 1f - progress;
+        dir = Constants.Opposite(dir);
     }
 
-
-    public void updateLastPosition(int row, int col)
+    private Vector3 Cell(int r, int c)
     {
-        currLocation[0] = row;
-        currLocation[1] = col;
+        Vector3 p = Constants.CellToWorld(r, c);
+        p.z = z;
+        return p;
     }
 
-
-    // Start coroutine of Respawn pacstudent 
-    public void respawn()
+    // PacStudent ate this ghost while it was scared
+    public void Eaten()
     {
-        StartCoroutine("respawning");
-    }
-
-    // Respawn pacstudent after dead state
-    IEnumerator respawning()
-    {        
-        mAnimator.SetBool("isDead", true);
-        yield return new WaitForSeconds(2);
-        mAnimator.SetBool("isDead", false);
-        activeTweens = new List<CarModel>();
-        transform.position = startPos;
-        init();
-        yield return null;
+        if (state != GhostState.Normal) return;
+        state = GhostState.Dead;
+        eatenScare = Constants.scareCounter;
     }
 }

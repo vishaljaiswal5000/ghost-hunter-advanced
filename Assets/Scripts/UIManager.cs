@@ -18,11 +18,34 @@ public class UIManager : MonoBehaviour
     private float gameTimer = 0.0f;
     public bool isGhostTimerStarted = false;
 
+    // The UIManager survives the switch to the game scene; a fresh one comes with every start scene
+    static UIManager instance;
+
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            // new start scene: the old (persistent) one is replaced, our buttons point at us
+            instance.enabled = false;
+            Destroy(instance.gameObject);
+        }
+        instance = this;
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        //reset();
-        GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
+                GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
         if (highscore != null)
         {
             highscoreField = highscore.GetComponent<Text>();
@@ -59,7 +82,11 @@ public class UIManager : MonoBehaviour
 
     public void QuitGame()
     {
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     public IEnumerator loadScene(int sceneIndex)
@@ -68,7 +95,6 @@ public class UIManager : MonoBehaviour
         //yield return new WaitForSeconds(2);
         yield return null;
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneIndex);
-        SceneManager.sceneLoaded += OnSceneLoaded;
         //asyncOperation.completed += (param) => { HideLoadingScreen(); };
     }
 
@@ -76,8 +102,7 @@ public class UIManager : MonoBehaviour
     {
         if (scene.buildIndex == 0)
         {
-            //reset();
-            GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
+                        GameObject highscore = GameObject.FindGameObjectWithTag("Text-Highscore");
             if (highscore != null)
             {
                 highscoreField = highscore.GetComponent<Text>();
@@ -95,7 +120,8 @@ public class UIManager : MonoBehaviour
         else if (scene.buildIndex == 1)
         {
             // initiating game settings
-            Constants.init(originalFulllevelMap);
+            Constants.init();
+            gameTimer = 0f;
 
             // Saving ui reference
             GameObject quitButton = GameObject.FindGameObjectWithTag("QuitButton");
@@ -141,41 +167,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    IEnumerator ghostScareCountdown()
-    {
-        if (ghostScaredTimerField != null && Constants.isGhostScared)
-        {
-            isGhostTimerStarted = true;
-            ghostScaredTimerField.text = "Scared Time: 10";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 9";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 8";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 7";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 6";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 5";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 4";
-            yield return new WaitForSeconds(1.0f);
-            //Recovery state
-            Constants.isGhostRecovering = true;
-            ghostScaredTimerField.text = "Scared Time: 3";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 2";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "Scared Time: 1";
-            yield return new WaitForSeconds(1.0f);
-            ghostScaredTimerField.text = "";
-            yield return null;
-            isGhostTimerStarted = false;
-            Constants.isGhostScared = false;
-            Constants.isGhostRecovering = false;
-        }
-    }
-
     IEnumerator startCountdown()
     {
         if (countdownField != null)
@@ -206,14 +197,27 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Start ghost scare countdown
+    // Run the ghost scared timer (10 seconds, last 3 are the "recovering" phase)
     public void showGhostScaredTimer()
     {
-        if (ghostScaredTimerField != null && !isGhostTimerStarted)
+        if (Constants.isGhostScared && LoadAssets.isIntroCompleted && !Constants.isGameOver)
         {
-            StartCoroutine("ghostScareCountdown");
+            Constants.scaredTimeLeft -= Time.deltaTime;
+            Constants.isGhostRecovering = Constants.scaredTimeLeft <= Constants.scaredRecoveringTime;
+
+            if (Constants.scaredTimeLeft <= 0f)
+            {
+                Constants.isGhostScared = false;
+                Constants.isGhostRecovering = false;
+            }
         }
 
+        if (ghostScaredTimerField != null)
+        {
+            ghostScaredTimerField.text = Constants.isGhostScared
+                ? "Scared Time: " + Mathf.CeilToInt(Constants.scaredTimeLeft)
+                : "";
+        }
     }
 
     //Update score and pellet left field
@@ -230,61 +234,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Reset ui level variables
-    public void reset()
-    {
-        Constants.isGameOver = false;
-        Constants.currentScore = 0;
-        Constants.playerGameTime = 0f;
-        LoadAssets.isIntroCompleted = false;
-    }
-
-
     // Update high score on the screen
     public void setHighscore()
     {
-        if (PlayerPrefs.HasKey(Constants.highscoreKey))
+        if (highscoreField != null && PlayerPrefs.HasKey(Constants.highscoreKey))
         {
             highscoreField.text = "HighScore: " + PlayerPrefs.GetInt(Constants.highscoreKey).ToString();
         }
 
-        if (PlayerPrefs.HasKey(Constants.timeKey))
+        if (highscoreTimeField != null && PlayerPrefs.HasKey(Constants.timeKey))
         {
             highscoreTimeField.text = "Time: " + TimeSpan.FromSeconds(PlayerPrefs.GetFloat(Constants.timeKey)).ToString("mm':'ss':'ff");
         }
     }
-
-    // Full level map
-    public int[,] originalFulllevelMap ={
-                     {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7, 7, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1},
-                     {2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 6, 4, 0, 0, 4, 5, 4, 0, 0, 0, 4, 5, 4, 4, 5, 4, 0, 0, 0, 4, 5, 4, 0, 0, 4, 6, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 4, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 4, 4, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 3, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 5, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 2},
-                     {1, 2, 2, 2, 2, 1, 5, 4, 3, 4, 4, 3, 0, 4, 4, 0, 3, 4, 4, 3, 4, 5, 1, 2, 2, 2, 2, 1},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 3, 4, 4, 3, 0, 3, 3, 0, 3, 4, 4, 3, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 4, 0, 3, 4, 4, 0, 0, 4, 4, 3, 0, 4, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {2, 2, 2, 2, 2, 1, 5, 3, 3, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 3, 3, 5, 1, 2, 2, 2, 2, 2},
-                     {0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0},
-                     {0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0},
-                     {2, 2, 2, 2, 2, 1, 5, 3, 3, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 3, 3, 5, 1, 2, 2, 2, 2, 2},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 4, 0, 3, 4, 4, 0, 0, 4, 4, 3, 0, 4, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {0, 0, 0, 0, 0, 2, 5, 4, 3, 4, 4, 3, 0, 3, 3, 0, 3, 4, 4, 3, 4, 5, 2, 0, 0, 0, 0, 0},
-                     {1, 2, 2, 2, 2, 1, 5, 4, 3, 4, 4, 3, 0, 4, 4, 0, 3, 4, 4, 3, 4, 5, 1, 2, 2, 2, 2, 1},
-                     {2, 5, 5, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 3, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 4, 4, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3, 5, 3, 3, 5, 3, 4, 4, 4, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 6, 4, 0, 0, 4, 5, 4, 0, 0, 0, 4, 5, 4, 4, 5, 4, 0, 0, 0, 4, 5, 4, 0, 0, 4, 6, 2},
-                     {2, 5, 3, 4, 4, 3, 5, 3, 4, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 3, 5, 3, 4, 4, 3, 5, 2},
-                     {2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2},
-                     {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7, 7, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1},
-                     };
 }

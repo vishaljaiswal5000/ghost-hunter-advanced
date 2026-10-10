@@ -37,7 +37,8 @@ public class LoadAssets : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (backgroundIntro.time > 4.0f)
+        // intro lasts 4 seconds (matches the 3-2-1-Go countdown)
+        if (!isIntroCompleted && Time.timeSinceLevelLoad > 4.0f)
         {
             // it will stop music and time property set 0.
             backgroundIntro.Stop();

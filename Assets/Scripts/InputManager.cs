@@ -1,49 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class InputManager : MonoBehaviour
 {
     public GameObject car;
     public PacStudentController pacStudentController;
-    
+
     private void Update()
     {
         // load car after completion of intro
-        if (car == null && LoadAssets.isIntroCompleted && SceneManager.GetActiveScene().buildIndex == 1)
+        if (car == null)
         {
+            if (!LoadAssets.isIntroCompleted) return;
             car = GameObject.FindGameObjectWithTag("Car");
-            this.pacStudentController = car.GetComponent<PacStudentController>();
+            if (car == null) return;
+            pacStudentController = car.GetComponent<PacStudentController>();
         }
 
         // Control pacstudent movement until game is over.
-        if (car != null && !Constants.isGameOver)
-        {
+        if (Constants.isGameOver) return;
 
-            if (Input.GetKeyDown(KeyCode.W))
-            {                
-                pacStudentController.AddTween(car.transform, KeyCode.W);
-                pacStudentController.lastInput = KeyCode.W;
-            }
-
-            if (Input.GetKeyDown(KeyCode.S))
-            {             
-                pacStudentController.AddTween(car.transform, KeyCode.S);
-                pacStudentController.lastInput = KeyCode.S;
-            }
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {             
-                pacStudentController.AddTween(car.transform, KeyCode.A);
-                pacStudentController.lastInput = KeyCode.A;
-            }
-
-            if (Input.GetKeyDown(KeyCode.D))
-            {             
-                pacStudentController.AddTween(car.transform, KeyCode.D);
-                pacStudentController.lastInput = KeyCode.D;
-            }
-        }
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) pacStudentController.SetInput(0);
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) pacStudentController.SetInput(1);
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) pacStudentController.SetInput(2);
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) pacStudentController.SetInput(3);
     }
 }
